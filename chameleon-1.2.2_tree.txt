@@ -1,0 +1,80 @@
+src
+└── main
+    ├── java
+    │   └── mchorse
+    │       └── chameleon
+    │           ├── Chameleon.java
+    │           ├── ClientProxy.java
+    │           ├── CommonProxy.java
+    │           ├── animation
+    │           │   ├── ActionConfig.java
+    │           │   ├── ActionPlayback.java
+    │           │   ├── ActionsConfig.java
+    │           │   └── Animator.java
+    │           ├── client
+    │           │   └── ChameleonPack.java
+    │           ├── lib
+    │           │   ├── ChameleonAnimator.java
+    │           │   ├── ChameleonLoader.java
+    │           │   ├── ChameleonModel.java
+    │           │   ├── MolangHelper.java
+    │           │   ├── data
+    │           │   │   ├── animation
+    │           │   │   │   ├── Animation.java
+    │           │   │   │   ├── AnimationChannel.java
+    │           │   │   │   ├── AnimationInterpolation.java
+    │           │   │   │   ├── AnimationPart.java
+    │           │   │   │   ├── AnimationVector.java
+    │           │   │   │   └── Animations.java
+    │           │   │   └── model
+    │           │   │       ├── Model.java
+    │           │   │       ├── ModelBone.java
+    │           │   │       ├── ModelCube.java
+    │           │   │       ├── ModelQuad.java
+    │           │   │       ├── ModelTransform.java
+    │           │   │       ├── ModelUV.java
+    │           │   │       └── ModelVertex.java
+    │           │   ├── parsing
+    │           │   │   ├── AnimationParser.java
+    │           │   │   └── ModelParser.java
+    │           │   ├── render
+    │           │   │   ├── ChameleonAxisRenderer.java
+    │           │   │   ├── ChameleonCubeRenderer.java
+    │           │   │   ├── ChameleonPostRenderer.java
+    │           │   │   ├── ChameleonRenderer.java
+    │           │   │   └── IChameleonRenderProcessor.java
+    │           │   └── utils
+    │           │       └── MatrixStack.java
+    │           ├── mclib
+    │           │   ├── ChameleonTree.java
+    │           │   └── ValueButtons.java
+    │           └── metamorph
+    │               ├── ChameleonFactory.java
+    │               ├── ChameleonMorph.java
+    │               ├── ChameleonSection.java
+    │               ├── editor
+    │               │   ├── GuiActionsPanel.java
+    │               │   ├── GuiChameleonMainPanel.java
+    │               │   ├── GuiChameleonModelRenderer.java
+    │               │   ├── GuiChameleonMorph.java
+    │               │   ├── GuiCustomBodyPartEditor.java
+    │               │   ├── IBonePicker.java
+    │               │   └── render
+    │               │       ├── ChameleonHighlightRenderer.java
+    │               │       └── ChameleonStencilRenderer.java
+    │               └── pose
+    │                   ├── AnimatedPose.java
+    │                   ├── AnimatedPoseTransform.java
+    │                   ├── AnimatedTransform.java
+    │                   └── PoseAnimation.java
+    └── resources
+        ├── assets
+        │   └── chameleon
+        │       └── lang
+        │           ├── en_us.lang
+        │           ├── ru_ru.lang
+        │           ├── uk_ua.lang
+        │           ├── zh_cn.lang
+        │           └── zh_tw.lang
+        ├── mcmod.info
+        └── pack.mcmeta

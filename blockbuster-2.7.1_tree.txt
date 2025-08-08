@@ -1,0 +1,826 @@
+src
+└── main
+    ├── java
+    │   ├── at
+    │   │   └── dhyan
+    │   │       └── open_imaging
+    │   │           └── GifDecoder.java
+    │   └── mchorse
+    │       ├── blockbuster
+    │       │   ├── Blockbuster.java
+    │       │   ├── ClientProxy.java
+    │       │   ├── CommonProxy.java
+    │       │   ├── aperture
+    │       │   │   ├── CameraHandler.java
+    │       │   │   ├── camera
+    │       │   │   │   └── modifiers
+    │       │   │   │       └── TrackerModifier.java
+    │       │   │   ├── gui
+    │       │   │   │   ├── GuiDirectorConfigOptions.java
+    │       │   │   │   ├── GuiPlayback.java
+    │       │   │   │   └── panels
+    │       │   │   │       └── modifiers
+    │       │   │   │           └── GuiTrackerModifierPanel.java
+    │       │   │   └── network
+    │       │   │       ├── client
+    │       │   │       │   ├── ClientHandlerCameraProfileList.java
+    │       │   │       │   └── ClientHandlerSceneLength.java
+    │       │   │       ├── common
+    │       │   │       │   ├── PacketAudioShift.java
+    │       │   │       │   ├── PacketRequestLength.java
+    │       │   │       │   ├── PacketRequestProfiles.java
+    │       │   │       │   └── PacketSceneLength.java
+    │       │   │       └── server
+    │       │   │           ├── ServerHandlerAudioShift.java
+    │       │   │           ├── ServerHandlerRequestLength.java
+    │       │   │           └── ServerHandlerRequestProfiles.java
+    │       │   ├── api
+    │       │   │   ├── Model.java
+    │       │   │   ├── ModelClientHandler.java
+    │       │   │   ├── ModelHandler.java
+    │       │   │   ├── ModelLimb.java
+    │       │   │   ├── ModelPack.java
+    │       │   │   ├── ModelPose.java
+    │       │   │   ├── ModelTransform.java
+    │       │   │   ├── ModelUserItem.java
+    │       │   │   ├── formats
+    │       │   │   │   ├── IMeshes.java
+    │       │   │   │   ├── Mesh.java
+    │       │   │   │   ├── obj
+    │       │   │   │   │   ├── MeshOBJ.java
+    │       │   │   │   │   ├── MeshesOBJ.java
+    │       │   │   │   │   ├── OBJDataMesh.java
+    │       │   │   │   │   ├── OBJFace.java
+    │       │   │   │   │   ├── OBJIndexGroup.java
+    │       │   │   │   │   ├── OBJMaterial.java
+    │       │   │   │   │   ├── OBJParser.java
+    │       │   │   │   │   ├── ShapeKey.java
+    │       │   │   │   │   ├── Vector2f.java
+    │       │   │   │   │   └── Vector3f.java
+    │       │   │   │   └── vox
+    │       │   │   │       ├── MeshesVOX.java
+    │       │   │   │       ├── VoxBuilder.java
+    │       │   │   │       ├── VoxDocument.java
+    │       │   │   │       ├── VoxReader.java
+    │       │   │   │       └── data
+    │       │   │   │           ├── Vox.java
+    │       │   │   │           ├── VoxBaseNode.java
+    │       │   │   │           ├── VoxChunk.java
+    │       │   │   │           ├── VoxGroup.java
+    │       │   │   │           ├── VoxLayer.java
+    │       │   │   │           ├── VoxShape.java
+    │       │   │   │           ├── VoxTexture.java
+    │       │   │   │           └── VoxTransform.java
+    │       │   │   ├── json
+    │       │   │   │   ├── ModelAdapter.java
+    │       │   │   │   ├── ModelLimbAdapter.java
+    │       │   │   │   └── ModelPoseAdapter.java
+    │       │   │   ├── loaders
+    │       │   │   │   ├── IModelLoader.java
+    │       │   │   │   ├── ModelLoaderJSON.java
+    │       │   │   │   ├── ModelLoaderOBJ.java
+    │       │   │   │   ├── ModelLoaderVOX.java
+    │       │   │   │   └── lazy
+    │       │   │   │       ├── IModelLazyLoader.java
+    │       │   │   │       ├── ModelLazyLoaderJSON.java
+    │       │   │   │       ├── ModelLazyLoaderOBJ.java
+    │       │   │   │       └── ModelLazyLoaderVOX.java
+    │       │   │   └── resource
+    │       │   │       ├── FileEntry.java
+    │       │   │       ├── IResourceEntry.java
+    │       │   │       └── StreamEntry.java
+    │       │   ├── audio
+    │       │   │   ├── AudioFile.java
+    │       │   │   ├── AudioHandler.java
+    │       │   │   ├── AudioLibrary.java
+    │       │   │   ├── AudioRenderer.java
+    │       │   │   └── AudioState.java
+    │       │   ├── capabilities
+    │       │   │   ├── CapabilityHandler.java
+    │       │   │   └── recording
+    │       │   │       ├── IRecording.java
+    │       │   │       ├── Recording.java
+    │       │   │       ├── RecordingProvider.java
+    │       │   │       └── RecordingStorage.java
+    │       │   ├── client
+    │       │   │   ├── ActorsPack.java
+    │       │   │   ├── KeyboardHandler.java
+    │       │   │   ├── RenderingHandler.java
+    │       │   │   ├── SkinHandler.java
+    │       │   │   ├── gui
+    │       │   │   │   ├── GuiActor.java
+    │       │   │   │   ├── GuiGun.java
+    │       │   │   │   ├── GuiImmersiveEditor.java
+    │       │   │   │   ├── GuiImmersiveMorphMenu.java
+    │       │   │   │   ├── GuiRecordingOverlay.java
+    │       │   │   │   ├── dashboard
+    │       │   │   │   │   ├── GuiBlockbusterPanel.java
+    │       │   │   │   │   ├── GuiBlockbusterPanels.java
+    │       │   │   │   │   ├── GuiFirstTime.java
+    │       │   │   │   │   └── panels
+    │       │   │   │   │       ├── GuiBlockList.java
+    │       │   │   │   │       ├── GuiTextureManagerPanel.java
+    │       │   │   │   │       ├── model_block
+    │       │   │   │   │       │   ├── GuiModelBlockList.java
+    │       │   │   │   │       │   └── GuiModelBlockPanel.java
+    │       │   │   │   │       ├── model_editor
+    │       │   │   │   │       │   ├── GuiModelEditorPanel.java
+    │       │   │   │   │       │   ├── tabs
+    │       │   │   │   │       │   │   ├── GuiAnchorModal.java
+    │       │   │   │   │       │   │   ├── GuiModelEditorTab.java
+    │       │   │   │   │       │   │   ├── GuiModelLimbs.java
+    │       │   │   │   │       │   │   ├── GuiModelList.java
+    │       │   │   │   │       │   │   ├── GuiModelOptions.java
+    │       │   │   │   │       │   │   └── GuiModelPoses.java
+    │       │   │   │   │       │   └── utils
+    │       │   │   │   │       │       ├── GuiBBModelRenderer.java
+    │       │   │   │   │       │       ├── GuiPoseTransformations.java
+    │       │   │   │   │       │       ├── GuiTextureCanvas.java
+    │       │   │   │   │       │       ├── GuiThreeElement.java
+    │       │   │   │   │       │       ├── GuiTwoElement.java
+    │       │   │   │   │       │       └── ModelUtils.java
+    │       │   │   │   │       ├── recording_editor
+    │       │   │   │   │       │   ├── GuiRecordList.java
+    │       │   │   │   │       │   ├── GuiRecordTimeline.java
+    │       │   │   │   │       │   ├── GuiRecordingEditorPanel.java
+    │       │   │   │   │       │   └── actions
+    │       │   │   │   │       │       ├── GuiActionPanel.java
+    │       │   │   │   │       │       ├── GuiBlockActionPanel.java
+    │       │   │   │   │       │       ├── GuiBreakBlockActionPanel.java
+    │       │   │   │   │       │       ├── GuiBreakBlockAnimationPanel.java
+    │       │   │   │   │       │       ├── GuiChatActionPanel.java
+    │       │   │   │   │       │       ├── GuiCommandActionPanel.java
+    │       │   │   │   │       │       ├── GuiDamageActionPanel.java
+    │       │   │   │   │       │       ├── GuiDropActionPanel.java
+    │       │   │   │   │       │       ├── GuiEmptyActionPanel.java
+    │       │   │   │   │       │       ├── GuiEquipActionPanel.java
+    │       │   │   │   │       │       ├── GuiHotbarChangeActionPanel.java
+    │       │   │   │   │       │       ├── GuiInteractEntityActionPanel.java
+    │       │   │   │   │       │       ├── GuiItemUseActionPanel.java
+    │       │   │   │   │       │       ├── GuiItemUseBlockActionPanel.java
+    │       │   │   │   │       │       ├── GuiMorphActionPanel.java
+    │       │   │   │   │       │       ├── GuiMountingActionPanel.java
+    │       │   │   │   │       │       ├── GuiPlaceBlockActionPanel.java
+    │       │   │   │   │       │       └── GuiShootArrowActionPanel.java
+    │       │   │   │   │       ├── scene
+    │       │   │   │   │       │   ├── GuiReplaySelector.java
+    │       │   │   │   │       │   ├── GuiSceneManager.java
+    │       │   │   │   │       │   └── GuiScenePanel.java
+    │       │   │   │   │       └── snowstorm
+    │       │   │   │   │           ├── GuiSectionManager.java
+    │       │   │   │   │           ├── GuiSnowstorm.java
+    │       │   │   │   │           ├── GuiSnowstormRenderer.java
+    │       │   │   │   │           ├── sections
+    │       │   │   │   │           │   ├── GuiSnowstormAppearanceSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormCollisionAppearanceSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormCollisionLightingSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormCollisionSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormComponentSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormExpirationSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormGeneralSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormInitializationSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormLifetimeSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormLightingSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormModeSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormMotionSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormParticleMorphSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormRateSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormSection.java
+    │       │   │   │   │           │   ├── GuiSnowstormShapeSection.java
+    │       │   │   │   │           │   └── GuiSnowstormSpaceSection.java
+    │       │   │   │   │           └── utils
+    │       │   │   │   │               └── GuiGradientEditor.java
+    │       │   │   │   └── utils
+    │       │   │   │       └── GuiShapeKeysEditor.java
+    │       │   │   ├── model
+    │       │   │   │   ├── ModelCustom.java
+    │       │   │   │   ├── ModelCustomRenderer.java
+    │       │   │   │   ├── ModelOBJRenderer.java
+    │       │   │   │   ├── ModelVoxRenderer.java
+    │       │   │   │   └── parsing
+    │       │   │   │       ├── IModelCustom.java
+    │       │   │   │       ├── ModelExporter.java
+    │       │   │   │       ├── ModelExporterOBJ.java
+    │       │   │   │       ├── ModelExtrudedLayer.java
+    │       │   │   │       └── ModelParser.java
+    │       │   │   ├── particles
+    │       │   │   │   ├── BedrockCurve.java
+    │       │   │   │   ├── BedrockCurveType.java
+    │       │   │   │   ├── BedrockLibrary.java
+    │       │   │   │   ├── BedrockMaterial.java
+    │       │   │   │   ├── BedrockScheme.java
+    │       │   │   │   ├── BedrockSchemeJsonAdapter.java
+    │       │   │   │   ├── components
+    │       │   │   │   │   ├── BedrockComponentBase.java
+    │       │   │   │   │   ├── IComponentBase.java
+    │       │   │   │   │   ├── IComponentEmitterInitialize.java
+    │       │   │   │   │   ├── IComponentEmitterUpdate.java
+    │       │   │   │   │   ├── IComponentParticleInitialize.java
+    │       │   │   │   │   ├── IComponentParticleMorphRender.java
+    │       │   │   │   │   ├── IComponentParticleRender.java
+    │       │   │   │   │   ├── IComponentParticleUpdate.java
+    │       │   │   │   │   ├── IComponentRenderBase.java
+    │       │   │   │   │   ├── appearance
+    │       │   │   │   │   │   ├── BedrockComponentAppearanceBillboard.java
+    │       │   │   │   │   │   ├── BedrockComponentAppearanceLighting.java
+    │       │   │   │   │   │   ├── BedrockComponentAppearanceTinting.java
+    │       │   │   │   │   │   ├── BedrockComponentCollisionAppearance.java
+    │       │   │   │   │   │   ├── BedrockComponentCollisionTinting.java
+    │       │   │   │   │   │   ├── BedrockComponentParticleMorph.java
+    │       │   │   │   │   │   ├── CameraFacing.java
+    │       │   │   │   │   │   └── Tint.java
+    │       │   │   │   │   ├── expiration
+    │       │   │   │   │   │   ├── BedrockComponentExpireBlocks.java
+    │       │   │   │   │   │   ├── BedrockComponentExpireInBlocks.java
+    │       │   │   │   │   │   ├── BedrockComponentExpireNotInBlocks.java
+    │       │   │   │   │   │   ├── BedrockComponentKillPlane.java
+    │       │   │   │   │   │   └── BedrockComponentParticleLifetime.java
+    │       │   │   │   │   ├── lifetime
+    │       │   │   │   │   │   ├── BedrockComponentLifetime.java
+    │       │   │   │   │   │   ├── BedrockComponentLifetimeExpression.java
+    │       │   │   │   │   │   ├── BedrockComponentLifetimeLooping.java
+    │       │   │   │   │   │   └── BedrockComponentLifetimeOnce.java
+    │       │   │   │   │   ├── meta
+    │       │   │   │   │   │   ├── BedrockComponentInitialization.java
+    │       │   │   │   │   │   └── BedrockComponentLocalSpace.java
+    │       │   │   │   │   ├── motion
+    │       │   │   │   │   │   ├── BedrockComponentInitialSpeed.java
+    │       │   │   │   │   │   ├── BedrockComponentInitialSpin.java
+    │       │   │   │   │   │   ├── BedrockComponentMotion.java
+    │       │   │   │   │   │   ├── BedrockComponentMotionCollision.java
+    │       │   │   │   │   │   ├── BedrockComponentMotionDynamic.java
+    │       │   │   │   │   │   └── BedrockComponentMotionParametric.java
+    │       │   │   │   │   ├── rate
+    │       │   │   │   │   │   ├── BedrockComponentRate.java
+    │       │   │   │   │   │   ├── BedrockComponentRateInstant.java
+    │       │   │   │   │   │   └── BedrockComponentRateSteady.java
+    │       │   │   │   │   └── shape
+    │       │   │   │   │       ├── BedrockComponentShapeBase.java
+    │       │   │   │   │       ├── BedrockComponentShapeBox.java
+    │       │   │   │   │       ├── BedrockComponentShapeDisc.java
+    │       │   │   │   │       ├── BedrockComponentShapeEntityAABB.java
+    │       │   │   │   │       ├── BedrockComponentShapePoint.java
+    │       │   │   │   │       ├── BedrockComponentShapeSphere.java
+    │       │   │   │   │       └── ShapeDirection.java
+    │       │   │   │   └── emitter
+    │       │   │   │       ├── BedrockEmitter.java
+    │       │   │   │       └── BedrockParticle.java
+    │       │   │   ├── render
+    │       │   │   │   ├── GunMiscRender.java
+    │       │   │   │   ├── IRenderLast.java
+    │       │   │   │   ├── RenderActor.java
+    │       │   │   │   ├── RenderCustomModel.java
+    │       │   │   │   ├── RenderExpirableDummy.java
+    │       │   │   │   ├── RenderGunProjectile.java
+    │       │   │   │   ├── layer
+    │       │   │   │   │   └── LayerHeldItem.java
+    │       │   │   │   └── tileentity
+    │       │   │   │       ├── TileEntityDirectorRenderer.java
+    │       │   │   │       ├── TileEntityGunItemStackRenderer.java
+    │       │   │   │       ├── TileEntityModelItemStackRenderer.java
+    │       │   │   │       └── TileEntityModelRenderer.java
+    │       │   │   └── textures
+    │       │   │       ├── GifFrameTexture.java
+    │       │   │       ├── GifProcessThread.java
+    │       │   │       ├── GifTexture.java
+    │       │   │       ├── MipmapTexture.java
+    │       │   │       └── URLDownloadThread.java
+    │       │   ├── commands
+    │       │   │   ├── BBCommandBase.java
+    │       │   │   ├── CommandAction.java
+    │       │   │   ├── CommandDamage.java
+    │       │   │   ├── CommandItemNBT.java
+    │       │   │   ├── CommandModel.java
+    │       │   │   ├── CommandModelBlock.java
+    │       │   │   ├── CommandMount.java
+    │       │   │   ├── CommandOnHead.java
+    │       │   │   ├── CommandRecord.java
+    │       │   │   ├── CommandScene.java
+    │       │   │   ├── CommandSpectate.java
+    │       │   │   ├── action
+    │       │   │   │   ├── SubCommandActionAppend.java
+    │       │   │   │   ├── SubCommandActionCancel.java
+    │       │   │   │   ├── SubCommandActionClear.java
+    │       │   │   │   ├── SubCommandActionPlay.java
+    │       │   │   │   ├── SubCommandActionRecord.java
+    │       │   │   │   ├── SubCommandActionRequest.java
+    │       │   │   │   └── SubCommandActionStop.java
+    │       │   │   ├── model
+    │       │   │   │   ├── SubCommandModelClear.java
+    │       │   │   │   ├── SubCommandModelClearStructures.java
+    │       │   │   │   ├── SubCommandModelCombine.java
+    │       │   │   │   ├── SubCommandModelConvertSkin.java
+    │       │   │   │   ├── SubCommandModelExport.java
+    │       │   │   │   ├── SubCommandModelExportObj.java
+    │       │   │   │   ├── SubCommandModelReload.java
+    │       │   │   │   └── SubCommandModelReport.java
+    │       │   │   ├── modelblock
+    │       │   │   │   ├── SubCommandModelBlockBase.java
+    │       │   │   │   ├── SubCommandModelBlockMorph.java
+    │       │   │   │   └── SubCommandModelBlockProperty.java
+    │       │   │   └── record
+    │       │   │       ├── SubCommandRecordAdd.java
+    │       │   │       ├── SubCommandRecordApply.java
+    │       │   │       ├── SubCommandRecordBase.java
+    │       │   │       ├── SubCommandRecordCalculateBodyYaw.java
+    │       │   │       ├── SubCommandRecordCamera.java
+    │       │   │       ├── SubCommandRecordClean.java
+    │       │   │       ├── SubCommandRecordCreate.java
+    │       │   │       ├── SubCommandRecordCut.java
+    │       │   │       ├── SubCommandRecordDelete.java
+    │       │   │       ├── SubCommandRecordDupe.java
+    │       │   │       ├── SubCommandRecordErase.java
+    │       │   │       ├── SubCommandRecordFade.java
+    │       │   │       ├── SubCommandRecordFill.java
+    │       │   │       ├── SubCommandRecordFlip.java
+    │       │   │       ├── SubCommandRecordGet.java
+    │       │   │       ├── SubCommandRecordInfo.java
+    │       │   │       ├── SubCommandRecordMerge.java
+    │       │   │       ├── SubCommandRecordOrigin.java
+    │       │   │       ├── SubCommandRecordProcess.java
+    │       │   │       ├── SubCommandRecordProlong.java
+    │       │   │       ├── SubCommandRecordRemove.java
+    │       │   │       ├── SubCommandRecordRemoveAll.java
+    │       │   │       ├── SubCommandRecordRemoveBodyYaw.java
+    │       │   │       ├── SubCommandRecordRename.java
+    │       │   │       ├── SubCommandRecordRestore.java
+    │       │   │       ├── SubCommandRecordReverse.java
+    │       │   │       ├── SubCommandRecordSearch.java
+    │       │   │       └── SubCommandRecordTP.java
+    │       │   ├── common
+    │       │   │   ├── BlockbusterPermissions.java
+    │       │   │   ├── BlockbusterTab.java
+    │       │   │   ├── GuiHandler.java
+    │       │   │   ├── GunProps.java
+    │       │   │   ├── OrientedBB.java
+    │       │   │   ├── block
+    │       │   │   │   ├── BlockDimGreen.java
+    │       │   │   │   ├── BlockDirector.java
+    │       │   │   │   ├── BlockGreen.java
+    │       │   │   │   └── BlockModel.java
+    │       │   │   ├── entity
+    │       │   │   │   ├── EntityActor.java
+    │       │   │   │   ├── EntityGunProjectile.java
+    │       │   │   │   └── ExpirableDummyEntity.java
+    │       │   │   ├── item
+    │       │   │   │   ├── ItemActorConfig.java
+    │       │   │   │   ├── ItemBlockGreen.java
+    │       │   │   │   ├── ItemBlockModel.java
+    │       │   │   │   ├── ItemGun.java
+    │       │   │   │   ├── ItemPlayback.java
+    │       │   │   │   └── ItemRegister.java
+    │       │   │   └── tileentity
+    │       │   │       ├── TileEntityDirector.java
+    │       │   │       ├── TileEntityModel.java
+    │       │   │       └── TileEntityModelSettings.java
+    │       │   ├── core
+    │       │   │   ├── BBCoreClassTransformer.java
+    │       │   │   ├── BBCoreMod.java
+    │       │   │   ├── BBCoreModInfo.java
+    │       │   │   └── transformers
+    │       │   │       ├── EntityItemTransformer.java
+    │       │   │       ├── EntityRendererTransformer.java
+    │       │   │       ├── EntityTransformationUtilsTransformer.java
+    │       │   │       ├── EntityTransformer.java
+    │       │   │       ├── InventoryPlayerTransformer.java
+    │       │   │       ├── RenderEntityItemTransformer.java
+    │       │   │       ├── RenderGlobalTransformer.java
+    │       │   │       ├── RenderItemTransformer.java
+    │       │   │       ├── RenderPlayerTransformer.java
+    │       │   │       └── WorldTransformer.java
+    │       │   ├── events
+    │       │   │   ├── ActionPanelRegisterEvent.java
+    │       │   │   ├── GunShootHandler.java
+    │       │   │   ├── PlayerHandler.java
+    │       │   │   └── TickHandler.java
+    │       │   ├── network
+    │       │   │   ├── Dispatcher.java
+    │       │   │   ├── client
+    │       │   │   │   ├── ClientHandlerActorPause.java
+    │       │   │   │   ├── ClientHandlerCaption.java
+    │       │   │   │   ├── ClientHandlerModifyActor.java
+    │       │   │   │   ├── ClientHandlerModifyModelBlock.java
+    │       │   │   │   ├── ClientHandlerPlaybackButton.java
+    │       │   │   │   ├── ClientHandlerStructure.java
+    │       │   │   │   ├── ClientHandlerStructureList.java
+    │       │   │   │   ├── audio
+    │       │   │   │   │   └── ClientHandlerAudio.java
+    │       │   │   │   ├── guns
+    │       │   │   │   │   ├── ClientHandlerGunInfo.java
+    │       │   │   │   │   ├── ClientHandlerGunInteract.java
+    │       │   │   │   │   ├── ClientHandlerGunProjectile.java
+    │       │   │   │   │   ├── ClientHandlerGunProjectileVanish.java
+    │       │   │   │   │   ├── ClientHandlerGunShot.java
+    │       │   │   │   │   └── ClientHandlerGunStuck.java
+    │       │   │   │   ├── recording
+    │       │   │   │   │   ├── ClientHandlerApplyFrame.java
+    │       │   │   │   │   ├── ClientHandlerFramesLoad.java
+    │       │   │   │   │   ├── ClientHandlerPlayback.java
+    │       │   │   │   │   ├── ClientHandlerPlayerRecording.java
+    │       │   │   │   │   ├── ClientHandlerRequestedFrames.java
+    │       │   │   │   │   ├── ClientHandlerSyncTick.java
+    │       │   │   │   │   ├── ClientHandlerUnloadFrames.java
+    │       │   │   │   │   ├── ClientHandlerUnloadRecordings.java
+    │       │   │   │   │   └── actions
+    │       │   │   │   │       ├── ClientHandlerActionList.java
+    │       │   │   │   │       └── ClientHandlerActions.java
+    │       │   │   │   └── scene
+    │       │   │   │       ├── ClientHandlerSceneCast.java
+    │       │   │   │       ├── ClientHandlerSceneManage.java
+    │       │   │   │       └── ClientHandlerScenes.java
+    │       │   │   ├── common
+    │       │   │   │   ├── PacketActorPause.java
+    │       │   │   │   ├── PacketCaption.java
+    │       │   │   │   ├── PacketDamageControlCheck.java
+    │       │   │   │   ├── PacketModifyActor.java
+    │       │   │   │   ├── PacketModifyModelBlock.java
+    │       │   │   │   ├── PacketPlaybackButton.java
+    │       │   │   │   ├── PacketReloadModels.java
+    │       │   │   │   ├── audio
+    │       │   │   │   │   └── PacketAudio.java
+    │       │   │   │   ├── guns
+    │       │   │   │   │   ├── PacketGunInfo.java
+    │       │   │   │   │   ├── PacketGunInteract.java
+    │       │   │   │   │   ├── PacketGunProjectile.java
+    │       │   │   │   │   ├── PacketGunProjectileVanish.java
+    │       │   │   │   │   ├── PacketGunReloading.java
+    │       │   │   │   │   ├── PacketGunShot.java
+    │       │   │   │   │   ├── PacketGunStuck.java
+    │       │   │   │   │   └── PacketZoomCommand.java
+    │       │   │   │   ├── recording
+    │       │   │   │   │   ├── PacketApplyFrame.java
+    │       │   │   │   │   ├── PacketFrames.java
+    │       │   │   │   │   ├── PacketFramesChunk.java
+    │       │   │   │   │   ├── PacketFramesLoad.java
+    │       │   │   │   │   ├── PacketFramesOverwrite.java
+    │       │   │   │   │   ├── PacketPlayback.java
+    │       │   │   │   │   ├── PacketPlayerRecording.java
+    │       │   │   │   │   ├── PacketRequestFrames.java
+    │       │   │   │   │   ├── PacketRequestRecording.java
+    │       │   │   │   │   ├── PacketRequestedFrames.java
+    │       │   │   │   │   ├── PacketSyncTick.java
+    │       │   │   │   │   ├── PacketUnloadFrames.java
+    │       │   │   │   │   ├── PacketUnloadRecordings.java
+    │       │   │   │   │   ├── PacketUpdatePlayerData.java
+    │       │   │   │   │   └── actions
+    │       │   │   │   │       ├── PacketActionList.java
+    │       │   │   │   │       ├── PacketActions.java
+    │       │   │   │   │       ├── PacketActionsChange.java
+    │       │   │   │   │       ├── PacketRequestAction.java
+    │       │   │   │   │       └── PacketRequestActions.java
+    │       │   │   │   ├── scene
+    │       │   │   │   │   ├── PacketRequestScenes.java
+    │       │   │   │   │   ├── PacketScene.java
+    │       │   │   │   │   ├── PacketSceneCast.java
+    │       │   │   │   │   ├── PacketSceneManage.java
+    │       │   │   │   │   ├── PacketScenePause.java
+    │       │   │   │   │   ├── PacketScenePlayback.java
+    │       │   │   │   │   ├── PacketSceneRecord.java
+    │       │   │   │   │   ├── PacketSceneRequestCast.java
+    │       │   │   │   │   ├── PacketScenes.java
+    │       │   │   │   │   └── sync
+    │       │   │   │   │       ├── PacketSceneGoto.java
+    │       │   │   │   │       └── PacketScenePlay.java
+    │       │   │   │   └── structure
+    │       │   │   │       ├── PacketStructure.java
+    │       │   │   │       ├── PacketStructureList.java
+    │       │   │   │       ├── PacketStructureListRequest.java
+    │       │   │   │       └── PacketStructureRequest.java
+    │       │   │   └── server
+    │       │   │       ├── ServerHandlerApplyFrame.java
+    │       │   │       ├── ServerHandlerDamageControlCheck.java
+    │       │   │       ├── ServerHandlerModifyActor.java
+    │       │   │       ├── ServerHandlerModifyModelBlock.java
+    │       │   │       ├── ServerHandlerPlaybackButton.java
+    │       │   │       ├── ServerHandlerReloadModels.java
+    │       │   │       ├── ServerHandlerStructureListRequest.java
+    │       │   │       ├── ServerHandlerStructureRequest.java
+    │       │   │       ├── gun
+    │       │   │       │   ├── ServerHandlerGunInfo.java
+    │       │   │       │   ├── ServerHandlerGunInteract.java
+    │       │   │       │   ├── ServerHandlerGunReloading.java
+    │       │   │       │   └── ServerHandlerZoomCommand.java
+    │       │   │       ├── recording
+    │       │   │       │   ├── ServerHandlerFramesChunk.java
+    │       │   │       │   ├── ServerHandlerFramesOverwrite.java
+    │       │   │       │   ├── ServerHandlerPlayback.java
+    │       │   │       │   ├── ServerHandlerRequestFrames.java
+    │       │   │       │   ├── ServerHandlerRequestRecording.java
+    │       │   │       │   ├── ServerHandlerUpdatePlayerData.java
+    │       │   │       │   └── actions
+    │       │   │       │       ├── ServerHandlerActionsChange.java
+    │       │   │       │       ├── ServerHandlerRequestAction.java
+    │       │   │       │       └── ServerHandlerRequestActions.java
+    │       │   │       └── scene
+    │       │   │           ├── ServerHandlerRequestScenes.java
+    │       │   │           ├── ServerHandlerSceneCast.java
+    │       │   │           ├── ServerHandlerSceneManage.java
+    │       │   │           ├── ServerHandlerScenePause.java
+    │       │   │           ├── ServerHandlerScenePlayback.java
+    │       │   │           ├── ServerHandlerSceneRecord.java
+    │       │   │           ├── ServerHandlerSceneRequestCast.java
+    │       │   │           └── sync
+    │       │   │               ├── ServerHandlerSceneGoto.java
+    │       │   │               └── ServerHandlerScenePlay.java
+    │       │   ├── recording
+    │       │   │   ├── LTHelper.java
+    │       │   │   ├── MPMHelper.java
+    │       │   │   ├── RecordManager.java
+    │       │   │   ├── RecordPlayer.java
+    │       │   │   ├── RecordRecorder.java
+    │       │   │   ├── RecordUtils.java
+    │       │   │   ├── ScheduledRecording.java
+    │       │   │   ├── Utils.java
+    │       │   │   ├── actions
+    │       │   │   │   ├── Action.java
+    │       │   │   │   ├── ActionRegistry.java
+    │       │   │   │   ├── AttackAction.java
+    │       │   │   │   ├── BreakBlockAction.java
+    │       │   │   │   ├── BreakBlockAnimation.java
+    │       │   │   │   ├── ChatAction.java
+    │       │   │   │   ├── CloseContainerAction.java
+    │       │   │   │   ├── CommandAction.java
+    │       │   │   │   ├── DamageAction.java
+    │       │   │   │   ├── DropAction.java
+    │       │   │   │   ├── EquipAction.java
+    │       │   │   │   ├── HotbarChangeAction.java
+    │       │   │   │   ├── InteractBlockAction.java
+    │       │   │   │   ├── InteractEntityAction.java
+    │       │   │   │   ├── ItemUseAction.java
+    │       │   │   │   ├── ItemUseBlockAction.java
+    │       │   │   │   ├── MorphAction.java
+    │       │   │   │   ├── MorphActionAction.java
+    │       │   │   │   ├── MountingAction.java
+    │       │   │   │   ├── PlaceBlockAction.java
+    │       │   │   │   ├── ShootArrowAction.java
+    │       │   │   │   ├── ShootGunAction.java
+    │       │   │   │   └── SwipeAction.java
+    │       │   │   ├── capturing
+    │       │   │   │   ├── ActionHandler.java
+    │       │   │   │   ├── DamageControl.java
+    │       │   │   │   ├── DamageControlManager.java
+    │       │   │   │   ├── FrameHandler.java
+    │       │   │   │   ├── PlayerTracker.java
+    │       │   │   │   └── WorldEventListener.java
+    │       │   │   ├── data
+    │       │   │   │   ├── Frame.java
+    │       │   │   │   ├── FrameChunk.java
+    │       │   │   │   ├── Mode.java
+    │       │   │   │   └── Record.java
+    │       │   │   ├── package-info.java
+    │       │   │   └── scene
+    │       │   │       ├── Replay.java
+    │       │   │       ├── Scene.java
+    │       │   │       ├── SceneLocation.java
+    │       │   │       ├── SceneManager.java
+    │       │   │       ├── SceneSender.java
+    │       │   │       └── fake
+    │       │   │           ├── FakeChannel.java
+    │       │   │           ├── FakeConfig.java
+    │       │   │           ├── FakeContext.java
+    │       │   │           ├── FakeFMLAttribute.java
+    │       │   │           └── FakeProtocol.java
+    │       │   └── utils
+    │       │       ├── EntityTransformationUtils.java
+    │       │       ├── EntityUtils.java
+    │       │       ├── ExpirableRunnable.java
+    │       │       ├── NBTUtils.java
+    │       │       ├── ResourcePackUtils.java
+    │       │       ├── TextureUtils.java
+    │       │       └── mclib
+    │       │           ├── BBIcons.java
+    │       │           ├── BlockbusterJarTree.java
+    │       │           ├── BlockbusterResourceTransformer.java
+    │       │           ├── BlockbusterTree.java
+    │       │           ├── GifFolder.java
+    │       │           ├── GifFrameFile.java
+    │       │           ├── ImageFolder.java
+    │       │           ├── ValueAudioButtons.java
+    │       │           ├── ValueMainButtons.java
+    │       │           └── coremod
+    │       │               ├── ClassMethodTransformer.java
+    │       │               ├── ClassTransformer.java
+    │       │               └── CoreClassTransformer.java
+    │       ├── blockbuster_pack
+    │       │   ├── BlockbusterFactory.java
+    │       │   ├── BlockbusterSection.java
+    │       │   ├── MetamorphHandler.java
+    │       │   ├── client
+    │       │   │   ├── gui
+    │       │   │   │   ├── GuiBetterLightsMorph.java
+    │       │   │   │   ├── GuiCustomBodyPartEditor.java
+    │       │   │   │   ├── GuiCustomMorph.java
+    │       │   │   │   ├── GuiImageMorph.java
+    │       │   │   │   ├── GuiLightMorph.java
+    │       │   │   │   ├── GuiParticleMorph.java
+    │       │   │   │   ├── GuiPosePanel.java
+    │       │   │   │   ├── GuiRecordMorph.java
+    │       │   │   │   ├── GuiSequencerMorph.java
+    │       │   │   │   ├── GuiSnowstormMorph.java
+    │       │   │   │   ├── GuiStructureMorph.java
+    │       │   │   │   ├── GuiTrackerMorph.java
+    │       │   │   │   ├── ILimbSelector.java
+    │       │   │   │   └── trackers
+    │       │   │   │       ├── GuiBaseTracker.java
+    │       │   │   │       └── GuiMorphTracking.java
+    │       │   │   ├── model
+    │       │   │   │   └── ModelElytra.java
+    │       │   │   └── render
+    │       │   │       ├── RenderCustomActor.java
+    │       │   │       └── layers
+    │       │   │           ├── LayerActorArmor.java
+    │       │   │           ├── LayerBodyPart.java
+    │       │   │           ├── LayerCustomHead.java
+    │       │   │           └── LayerElytra.java
+    │       │   ├── morphs
+    │       │   │   ├── BetterLightsMorph.java
+    │       │   │   ├── BetterLightsMorphTemplate.java
+    │       │   │   ├── CustomMorph.java
+    │       │   │   ├── ImageMorph.java
+    │       │   │   ├── LightMorph.java
+    │       │   │   ├── ParticleMorph.java
+    │       │   │   ├── RecordMorph.java
+    │       │   │   ├── SequencerMorph.java
+    │       │   │   ├── SnowstormMorph.java
+    │       │   │   ├── StructureMorph.java
+    │       │   │   ├── TrackerMorph.java
+    │       │   │   └── structure
+    │       │   │       ├── StructureAnimation.java
+    │       │   │       ├── StructureRenderer.java
+    │       │   │       └── StructureStatus.java
+    │       │   └── trackers
+    │       │       ├── ApertureCamera.java
+    │       │       ├── BaseTracker.java
+    │       │       ├── MorphTracker.java
+    │       │       └── TrackerRegistry.java
+    │       └── metamorph
+    │           └── client
+    │               └── model
+    │                   └── custom
+    │                       ├── ModelBat.java
+    │                       ├── ModelBlaze.java
+    │                       ├── ModelChicken.java
+    │                       ├── ModelExtended.java
+    │                       ├── ModelGhast.java
+    │                       ├── ModelGuardian.java
+    │                       ├── ModelIronGolem.java
+    │                       ├── ModelSilverfish.java
+    │                       ├── ModelSlime.java
+    │                       ├── ModelSpider.java
+    │                       ├── ModelSquid.java
+    │                       └── package-info.java
+    └── resources
+        ├── assets
+        │   └── blockbuster
+        │       ├── blockstates
+        │       │   ├── dim_green.json
+        │       │   ├── director.json
+        │       │   ├── green.json
+        │       │   ├── model.json
+        │       │   └── model_static.json
+        │       ├── models
+        │       │   ├── block
+        │       │   │   ├── director_empty.json
+        │       │   │   ├── director_play.json
+        │       │   │   ├── director_stop.json
+        │       │   │   ├── green.json
+        │       │   │   ├── model.json
+        │       │   │   └── model_static.json
+        │       │   ├── entity
+        │       │   │   ├── alex.json
+        │       │   │   ├── alex_3d.json
+        │       │   │   ├── cape.json
+        │       │   │   ├── empty.json
+        │       │   │   ├── eyes
+        │       │   │   │   ├── 3.0.json
+        │       │   │   │   ├── 3.0_1px.json
+        │       │   │   │   ├── 3.1
+        │       │   │   │   │   ├── base.obj
+        │       │   │   │   │   ├── eyebrow_l.obj
+        │       │   │   │   │   ├── eyebrow_r.obj
+        │       │   │   │   │   ├── eyelid_lb.obj
+        │       │   │   │   │   ├── eyelid_lt.obj
+        │       │   │   │   │   ├── eyelid_rb.obj
+        │       │   │   │   │   └── eyelid_rt.obj
+        │       │   │   │   ├── 3.1.json
+        │       │   │   │   ├── 3.1_simple
+        │       │   │   │   │   ├── base.obj
+        │       │   │   │   │   ├── eyebrow_l.obj
+        │       │   │   │   │   ├── eyebrow_r.obj
+        │       │   │   │   │   ├── eyelid_lb.obj
+        │       │   │   │   │   ├── eyelid_lt.obj
+        │       │   │   │   │   ├── eyelid_rb.obj
+        │       │   │   │   │   └── eyelid_rt.obj
+        │       │   │   │   ├── 3.1_simple.json
+        │       │   │   │   ├── alex.json
+        │       │   │   │   ├── fred.json
+        │       │   │   │   ├── head.json
+        │       │   │   │   ├── head_3d.json
+        │       │   │   │   └── steve.json
+        │       │   │   ├── fred.json
+        │       │   │   ├── fred_3d.json
+        │       │   │   ├── mchorse
+        │       │   │   │   └── head.json
+        │       │   │   ├── steve.json
+        │       │   │   └── steve_3d.json
+        │       │   ├── item
+        │       │   │   ├── actor_config.json
+        │       │   │   ├── dim_green.json
+        │       │   │   ├── director.json
+        │       │   │   ├── green.json
+        │       │   │   ├── gun.json
+        │       │   │   ├── model.json
+        │       │   │   ├── model_static.json
+        │       │   │   ├── playback.json
+        │       │   │   └── register.json
+        │       │   ├── user
+        │       │   │   └── README.txt
+        │       │   └── user.json
+        │       ├── optifine
+        │       │   └── dynamic_lights.properties
+        │       ├── particles
+        │       │   ├── default_fire.json
+        │       │   ├── default_magic.json
+        │       │   ├── default_rain.json
+        │       │   └── default_snow.json
+        │       └── textures
+        │           ├── blocks
+        │           │   ├── black.png
+        │           │   ├── blue.png
+        │           │   ├── cyan.png
+        │           │   ├── director_block_blank.png
+        │           │   ├── director_block_current_start.png
+        │           │   ├── director_block_current_stop.png
+        │           │   ├── director_block_side.png
+        │           │   ├── director_block_start.png
+        │           │   ├── director_block_stop.png
+        │           │   ├── green.png
+        │           │   ├── model_side.png
+        │           │   ├── purple.png
+        │           │   ├── red.png
+        │           │   ├── white.png
+        │           │   └── yellow.png
+        │           ├── default_particles.png
+        │           ├── entity
+        │           │   ├── actor.png
+        │           │   ├── cape.png
+        │           │   ├── eye_masks
+        │           │   │   ├── 1px.png
+        │           │   │   ├── 1px_l.2px_r.png
+        │           │   │   ├── 2px.png
+        │           │   │   └── 2px_l.1px_r.png
+        │           │   ├── eyes
+        │           │   │   ├── alex.png
+        │           │   │   └── steve.png
+        │           │   ├── mchorse
+        │           │   │   ├── eyes.png
+        │           │   │   ├── head.png
+        │           │   │   └── skin.png
+        │           │   ├── pixel.png
+        │           │   └── skin_masks
+        │           │       ├── body.png
+        │           │       ├── bodywear.png
+        │           │       ├── full_body.png
+        │           │       ├── full_head.png
+        │           │       ├── full_left_arm.png
+        │           │       ├── full_left_leg.png
+        │           │       ├── full_right_arm.png
+        │           │       ├── full_right_leg.png
+        │           │       ├── head.png
+        │           │       ├── left_arm.png
+        │           │       ├── left_armwear.png
+        │           │       ├── left_leg.png
+        │           │       ├── left_legwear.png
+        │           │       ├── outer_head.png
+        │           │       ├── right_arm.png
+        │           │       ├── right_armwear.png
+        │           │       ├── right_leg.png
+        │           │       └── right_legwear.png
+        │           ├── gui
+        │           │   ├── icon.png
+        │           │   ├── icons.png
+        │           │   └── recording.png
+        │           ├── items
+        │           │   ├── actor_config.png
+        │           │   ├── playback.png
+        │           │   └── register.png
+        │           ├── light_bulb.png
+        │           ├── light_bulb0.png
+        │           ├── light_bulb1.png
+        │           ├── light_bulb10.png
+        │           ├── light_bulb11.png
+        │           ├── light_bulb12.png
+        │           ├── light_bulb13.png
+        │           ├── light_bulb14.png
+        │           ├── light_bulb15.png
+        │           ├── light_bulb2.png
+        │           ├── light_bulb3.png
+        │           ├── light_bulb4.png
+        │           ├── light_bulb5.png
+        │           ├── light_bulb6.png
+        │           ├── light_bulb7.png
+        │           ├── light_bulb8.png
+        │           ├── light_bulb9.png
+        │           ├── spotlight.png
+        │           └── spotlight_light.png
+        └── mcmod.info

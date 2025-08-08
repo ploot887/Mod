@@ -1,0 +1,469 @@
+Анализ содержимого папки: C:\Users\User\Desktop\mody\commander-1.1\src
+==================================================
+
+--- Файл №1 ---
+Путь: main\java\mchorse\commander\ClientProxy.java
+--------------------
+package mchorse.commander;
+
+import net.minecraft.command.ICommandSender;
+import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+@SideOnly(Side.CLIENT)
+public class ClientProxy extends CommonProxy
+{
+    @Override
+    public void executeClientCommand(ICommandSender sender, String command)
+    {
+        ClientCommandHandler.instance.executeCommand(sender, command);
+    }
+
+    @Override
+    public void preLoad(FMLPreInitializationEvent event)
+    {
+        super.preLoad(event);
+
+        ClientCommandHandler.instance.registerCommand(new CommandForinc());
+    }
+}
+
+==================================================
+
+--- Файл №2 ---
+Путь: main\java\mchorse\commander\Commander.java
+--------------------
+package mchorse.commander;
+
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+
+/**
+ * Commander mod main entry
+ * 
+ * This mod provides a new command called /forin
+ */
+@Mod(modid = Commander.MODID, name = Commander.MODNAME, version = Commander.VERSION, dependencies = "required-after:mclib@[%MCLIB%,)", updateJSON = "https://raw.githubusercontent.com/mchorse/commander/master/version.json")
+public class Commander
+{
+    /* Mod info */
+    public static final String MODID = "commander";
+    public static final String MODNAME = "Commander";
+    public static final String VERSION = "%VERSION%";
+
+    /* Forge stuff */
+    @Mod.Instance
+    public static Commander instance;
+
+    @SidedProxy(serverSide = "mchorse.commander.CommonProxy", clientSide = "mchorse.commander.ClientProxy")
+    public static CommonProxy proxy;
+
+    @EventHandler
+    public void preLoad(FMLPreInitializationEvent event)
+    {
+        proxy.preLoad(event);
+    }
+
+    @EventHandler
+    public void startServer(FMLServerStartingEvent event)
+    {
+        event.registerServerCommand(new CommandForin());
+        CommandHandler.instance.clearVariables();
+    }
+}
+
+==================================================
+
+--- Файл №3 ---
+Путь: main\java\mchorse\commander\CommandForin.java
+--------------------
+package mchorse.commander;
+
+import java.util.Arrays;
+
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.server.MinecraftServer;
+
+public class CommandForin extends CommandBase
+{
+    public int index;
+
+    @Override
+    public String getName()
+    {
+        return "forin";
+    }
+
+    @Override
+    public String getUsage(ICommandSender sender)
+    {
+        return "commander.forin.help";
+    }
+
+    @Override
+    public int getRequiredPermissionLevel()
+    {
+        return 2;
+    }
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length < 3)
+        {
+            throw new WrongUsageException(this.getUsage(sender));
+        }
+
+        /* What do you think you're doing... */
+        if (this.index > 3)
+        {
+            return;
+        }
+
+        int start = CommandBase.parseInt(args[0]);
+        int end = CommandBase.parseInt(args[1]);
+        String command = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+
+        int step = end - start;
+
+        if (step == 0)
+        {
+            throw new CommandException("commander.error.zero", start, end);
+        }
+
+        CommandHandler handler = CommandHandler.instance;
+
+        handler.setVariable("x", sender.getPosition().getX());
+        handler.setVariable("y", sender.getPosition().getY());
+        handler.setVariable("z", sender.getPosition().getZ());
+
+        this.index++;
+
+        String index = this.getIndexName();
+
+        handler.setVariable(index + "_c", Math.abs(step) + 1);
+        handler.setVariable(index + "_s", start);
+        step /= Math.abs(step);
+
+        for (; start != end + step; start += step)
+        {
+            handler.setVariable(index, start);
+
+            this.executeNestedCommand(server, sender, command);
+        }
+
+        this.index--;
+        handler.unsetVariables(index, index + "_c", index + "_s", "x", "y", "z");
+    }
+
+    protected void executeNestedCommand(MinecraftServer server, ICommandSender sender, String command)
+    {
+        server.getCommandManager().executeCommand(sender, command);
+    }
+
+    /**
+     * Get index variable name based on current index 
+     */
+    private String getIndexName()
+    {
+        if (this.index == 1)
+        {
+            return "i";
+        }
+        else if (this.index == 2)
+        {
+            return "j";
+        }
+
+        return "k";
+    }
+}
+
+==================================================
+
+--- Файл №4 ---
+Путь: main\java\mchorse\commander\CommandForinc.java
+--------------------
+package mchorse.commander;
+
+import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
+
+public class CommandForinc extends CommandForin
+{
+    @Override
+    public String getName()
+    {
+        return "forinc";
+    }
+
+    @Override
+    public String getUsage(ICommandSender sender)
+    {
+        return "commander.forinc.help";
+    }
+
+    @Override
+    protected void executeNestedCommand(MinecraftServer server, ICommandSender sender, String command)
+    {
+        Commander.proxy.executeClientCommand(sender, command);
+    }
+}
+
+==================================================
+
+--- Файл №5 ---
+Путь: main\java\mchorse\commander\CommandHandler.java
+--------------------
+package mchorse.commander;
+
+import mchorse.mclib.math.IValue;
+import mchorse.mclib.math.MathBuilder;
+import mchorse.mclib.math.Variable;
+import mchorse.mclib.utils.Rewriter;
+import net.minecraft.command.ICommandManager;
+import net.minecraft.command.ICommandSender;
+import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.text.DecimalFormat;
+
+/**
+ * Command handler
+ * 
+ * This boy right there evaluates and replaces numerical 
+ * variables when used with /forin command.
+ */
+public class CommandHandler
+{
+    public static final CommandHandler instance = new CommandHandler();
+
+    public MathBuilder maths;
+    public Rewriter rewriter;
+
+    private boolean executingClient;
+
+    private CommandHandler()
+    {
+        this.clearVariables();
+    }
+
+    public void clearVariables()
+    {
+        this.maths = new MathBuilder();
+        this.rewriter = new SubRewriter("@\\{([^\\}]+)\\}", this.maths);
+    }
+
+    public void setVariable(String string, double value)
+    {
+        Variable var = this.maths.variables.get(string);
+
+        if (var == null)
+        {
+            this.maths.register(new Variable(string, value));
+        }
+        else
+        {
+            var.set(value);
+        }
+    }
+
+    public void unsetVariables(String... string)
+    {
+        for (String s : string)
+        {
+            this.maths.variables.remove(s);
+        }
+    }
+
+    /**
+     * This handler is responsible for processing commands. It does two 
+     * things: 
+     * 
+     * 1. Evaluates expressions via @{} tags
+     * 2. Breaks down multiple commands into separate in between || symbols
+     */
+    @SubscribeEvent
+    public void onCommand(CommandEvent event)
+    {
+        if (this.executingClient)
+        {
+            this.executingClient = false;
+
+            return;
+        }
+
+        if (event.getCommand() instanceof CommandForin || event.getCommand() instanceof CommandForinc)
+        {
+            return;
+        }
+
+        String command = String.join(" ", event.getParameters());
+        ICommandSender sender = event.getSender();
+        boolean remote = sender.getEntityWorld().isRemote;
+
+        if (command.contains(" || "))
+        {
+            /* Handle multiple commands */
+            String[] commands = command.split(" \\|\\| ");
+
+            commands[0] = event.getCommand().getName() + " " + commands[0];
+
+            if (remote)
+            {
+                this.executeClient(commands, sender);
+            }
+            else
+            {
+                this.executeCommands(commands, sender, sender.getServer().commandManager);
+            }
+
+            event.setCanceled(true);
+        }
+        else if (command.contains("@{"))
+        {
+            /* Handle substitution */
+            command = this.rewriter.rewrite(command);
+
+            if (remote)
+            {
+                this.executingClient = true;
+
+                event.setCanceled(true);
+                ClientCommandHandler.instance.executeCommand(sender, event.getCommand().getName() + " " + command);
+            }
+            else
+            {
+                event.setParameters(command.split(" "));
+            }
+        }
+    }
+
+    /**
+     * Client side only command execution 
+     */
+    @SideOnly(Side.CLIENT)
+    private void executeClient(String[] commands, ICommandSender sender)
+    {
+        this.executeCommands(commands, sender, ClientCommandHandler.instance);
+    }
+
+    /**
+     * Execute commands with given sender and command manager
+     */
+    private void executeCommands(String[] commands, ICommandSender sender, ICommandManager handler)
+    {
+        for (String command : commands)
+        {
+            command = command.trim();
+
+            if (command.isEmpty())
+            {
+                continue;
+            }
+
+            handler.executeCommand(sender, command);
+        }
+    }
+
+    /**
+     * This class is responsible for replacing placeholders 
+     * within commands
+     */
+    public static class SubRewriter extends Rewriter
+    {
+        public MathBuilder builder;
+        public DecimalFormat formater;
+
+        public SubRewriter(String regex, MathBuilder builder)
+        {
+            super(regex);
+
+            this.builder = builder;
+            this.formater = new DecimalFormat("0.######");
+        }
+
+        @Override
+        public String replacement()
+        {
+            try
+            {
+                IValue value = this.builder.parse(group(1)).get();
+
+                return value.isNumber() ? this.formater.format(value.doubleValue()) : value.stringValue();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return "";
+        }
+    }
+}
+
+==================================================
+
+--- Файл №6 ---
+Путь: main\java\mchorse\commander\CommonProxy.java
+--------------------
+package mchorse.commander;
+
+import net.minecraft.command.ICommandSender;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+
+public class CommonProxy
+{
+    public void executeClientCommand(ICommandSender sender, String command)
+    {}
+
+    public void preLoad(FMLPreInitializationEvent event)
+    {
+        MinecraftForge.EVENT_BUS.register(CommandHandler.instance);
+    }
+}
+
+
+==================================================
+
+--- Файл №7 ---
+Путь: main\resources\mcmod.info
+--------------------
+[
+    {
+        "modid": "commander",
+        "name": "Commander",
+        "description": "Advanced command usage",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "https://minecraft.curseforge.com/projects/commander",
+        "updateJSON": "https://raw.githubusercontent.com/mchorse/commander/master/version.json",
+        "authorList": ["mchorse"],
+        "credits": ""
+    }
+]
+
+==================================================
+
+--- Файл №8 ---
+Путь: main\resources\assets\commander\lang\en_US.lang
+--------------------
+#PARSE_ESCAPES
+commander.forin.help=Executes multiple commands starting from <start> to <end> incrementing by one. <end> is inclusive.\n/forin <start> <end> <command...>
+commander.forinc.help=Just like /forin but for client side commands.\n/forin? <start> <end> <command...>
+commander.error.zero=<start> and <end> arguments can't be the same number
+
+==================================================
+

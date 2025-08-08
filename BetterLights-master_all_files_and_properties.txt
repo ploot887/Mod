@@ -1,0 +1,1459 @@
+Анализ содержимого папки: C:\Users\User\Desktop\mody\BetterLights-master\src
+==================================================
+
+--- Файл №1 ---
+Путь: main\java\com\susjin\lampmod\Lamp.java
+--------------------
+package com.susjin.lampmod;
+
+import com.susjin.lampmod.init.ModBlocks;
+import com.susjin.lampmod.init.ModCrafting;
+import com.susjin.lampmod.init.ModItems;
+import com.susjin.lampmod.proxy.CommonProxy;
+import com.susjin.lampmod.tileentity.TileEntityLight;
+
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+
+@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, acceptedMinecraftVersions = Reference.ACCEPTED_VERSION)
+public class Lamp {
+	
+	@Instance
+	public static Lamp instance;
+	
+	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
+	public static CommonProxy proxy;
+
+	public static final CreativeTabs CREATIVE_TAB = new LightTab();
+	
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event)
+	{
+		System.out.println("Pre Init");
+		
+		ModItems.init();
+		ModItems.register();
+		
+		ModBlocks.init();
+		ModBlocks.register();
+	}
+	
+	@EventHandler
+	public void Init(FMLInitializationEvent event)
+	{
+		System.out.println("Init");
+		proxy.init();
+		
+		ModCrafting.register();
+		
+		GameRegistry.registerTileEntity(TileEntityLight.class, Reference.MOD_ID + "TileEntityLight");
+	}
+	
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event)
+	{
+		System.out.println("Post Init");
+	}
+}
+
+
+==================================================
+
+--- Файл №2 ---
+Путь: main\java\com\susjin\lampmod\LightTab.java
+--------------------
+package com.susjin.lampmod;
+
+import com.susjin.lampmod.init.ModBlocks;
+
+import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+
+public class LightTab extends CreativeTabs {
+
+	public LightTab() {
+		super("tabLight");
+	}
+
+	@Override
+	public Item getTabIconItem() {
+		ItemStack iStack = new ItemStack(ModBlocks.light);
+		return iStack.getItem();
+	}
+
+
+
+}
+
+
+==================================================
+
+--- Файл №3 ---
+Путь: main\java\com\susjin\lampmod\Reference.java
+--------------------
+package com.susjin.lampmod;
+
+public class Reference {
+	
+	public static final String MOD_ID = "slp";
+	public static final String NAME = "Lamp Mod";
+	public static final String VERSION = "1.0";
+	public static final String ACCEPTED_VERSION = "[1.10.2]";
+	
+	public static final String CLIENT_PROXY_CLASS = "com.susjin.lampmod.proxy.ClientProxy";
+	public static final String SERVER_PROXY_CLASS = "com.susjin.lampmod.proxy.ServerProxy";
+	
+	public static enum LampItems {
+		LAMPTOP("lamptop", "Itemlamptop"),
+		LAMPBOT("lampbot", "Itemlampbot");
+		
+		
+		private String unlocalizedName;
+		private String registryName;
+		
+		LampItems(String unlocalizedName, String registryName){
+			this.unlocalizedName = unlocalizedName;
+			this.registryName = registryName;
+		}
+		
+		public String getUnlocalizedName() {
+			return unlocalizedName;
+		}
+		
+		public String getRegistryName() {
+			return registryName;
+		}
+	}
+	public static enum LampBlocks {
+		GLOWINGBRICKS("glowingBricks", "BlockGlowingBricks"),
+		LIGHT("light", "BlockLight"),
+		LIGHTPROVIDER("lightprovider", "BlockLightProvider");
+		
+		private String unlocalizedName;
+		private String registryName;
+		
+		LampBlocks(String unlocalizedName, String registryName){
+			this.unlocalizedName = unlocalizedName;
+			this.registryName = registryName;
+		}
+		
+		public String getUnlocalizedName() {
+			return unlocalizedName;
+		}
+		
+		public String getRegistryName() {
+			return registryName;
+		}
+	}
+}
+
+
+==================================================
+
+--- Файл №4 ---
+Путь: main\java\com\susjin\lampmod\blocks\BlockGlowingBricks.java
+--------------------
+package com.susjin.lampmod.blocks;
+
+import com.susjin.lampmod.Lamp;
+import com.susjin.lampmod.Reference;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+
+public class BlockGlowingBricks extends Block {
+
+	public BlockGlowingBricks() {
+		super(Material.ROCK);
+		setUnlocalizedName(Reference.LampBlocks.GLOWINGBRICKS.getUnlocalizedName());
+		setRegistryName(Reference.LampBlocks.GLOWINGBRICKS.getRegistryName());
+		setHardness(1.0F);
+		setLightLevel(1.0F);
+		setCreativeTab(Lamp.CREATIVE_TAB);
+	}
+	
+
+}
+
+
+==================================================
+
+--- Файл №5 ---
+Путь: main\java\com\susjin\lampmod\blocks\BlockLight.java
+--------------------
+package com.susjin.lampmod.blocks;
+
+import java.util.List;
+
+import com.susjin.lampmod.Lamp;
+import com.susjin.lampmod.Reference;
+import com.susjin.lampmod.tileentity.TileEntityLight;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+
+public class BlockLight extends Block implements ITileEntityProvider {
+	
+	private static final AxisAlignedBB BOUNDING_BOX = new AxisAlignedBB(0.0625 * 4, 0.0625 * 3, 0.0625 * 4, 0.0625 * 12, 0.0625 * 16, 0.0625 * 12);
+
+	public BlockLight() {
+		super(Material.GLASS);
+		setUnlocalizedName(Reference.LampBlocks.LIGHT.getUnlocalizedName());
+		setRegistryName(Reference.LampBlocks.LIGHT.getRegistryName());
+		setLightLevel(1.0F);
+		setCreativeTab(Lamp.CREATIVE_TAB);
+	}
+	
+	
+	@Override
+	public boolean isFullCube(IBlockState state) {
+		return false;
+	}
+	
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
+
+	@Override
+	public BlockRenderLayer getBlockLayer() {
+		return BlockRenderLayer.TRANSLUCENT;
+	}
+	
+	@Override
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		return BOUNDING_BOX;
+	}
+	
+	@Override
+	public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox,List<AxisAlignedBB> collidingBoxes, Entity entityIn) {
+		super.addCollisionBoxToList(pos, entityBox, collidingBoxes, BOUNDING_BOX);
+	}
+
+
+	@Override
+	public TileEntity createNewTileEntity(World worldIn, int meta) {
+		return new TileEntityLight();
+	}
+	
+}
+
+
+==================================================
+
+--- Файл №6 ---
+Путь: main\java\com\susjin\lampmod\blocks\BlockLightProvider.java
+--------------------
+package com.susjin.lampmod.blocks;
+
+import javax.annotation.Nullable;
+
+import com.susjin.lampmod.Reference;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+public class BlockLightProvider extends Block {
+
+	public static final AxisAlignedBB SINGULAR_AABB = new AxisAlignedBB(0.5D, 0.5D, 0.5D, 0.5D, 0.5D, 0.5D);
+
+	public BlockLightProvider()
+	{
+		super(Material.AIR);
+		setUnlocalizedName(Reference.LampBlocks.LIGHTPROVIDER.getUnlocalizedName());
+		setRegistryName(Reference.LampBlocks.LIGHTPROVIDER.getRegistryName());
+		setDefaultState(blockState.getBaseState());
+		setTickRandomly(false);
+		blockHardness = -1F;
+		setLightLevel(1.0F);
+		this.translucent = true;
+	}
+	
+
+	@Nullable
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, World worldIn, BlockPos pos)
+    {
+        return NULL_AABB;
+    }
+
+	@Override
+	public boolean isFullyOpaque(IBlockState state)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isFullBlock(IBlockState state)
+	{
+		return false;
+	}
+
+	/**
+	 * Used to determine ambient occlusion and culling when rebuilding chunks for render
+	 */
+	 @Override
+	 public boolean isOpaqueCube(IBlockState state)
+	 {
+		 return false;
+	 }
+
+	 @Override
+	 public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid)
+	 {
+		 return false;
+	 }
+
+	 /**
+	  * Spawns this Block's drops into the World as EntityItems.
+	  */
+	 public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+	 {
+	 }
+
+	 /**
+	  * Whether this Block can be replaced directly by other blocks (true for e.g. tall grass)
+	  */
+	 @Override
+	 public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
+	 {
+		 return true;
+	 }
+
+	 @Override
+	 public boolean isFullCube(IBlockState state)
+	 {
+		 return false;
+	 }
+
+	 @Override
+	 public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+	 {
+		 return true;
+	 }
+
+	 @Override
+	 public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+	 {
+		 return getDefaultState();
+	 }
+
+	 @Override
+	 public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+	 {
+		 return;
+	 }
+
+	 @Override
+	 public IBlockState getStateFromMeta(int meta)
+	 {
+		 return getDefaultState();
+	 }
+
+	 @Override
+	 public int getMetaFromState(IBlockState state)
+	 {
+		 return 0;
+	 }
+
+	 @Override
+	 public EnumBlockRenderType getRenderType(IBlockState state)
+	 {
+		 return EnumBlockRenderType.INVISIBLE;
+	 }
+
+	 @Override
+	 @SideOnly(Side.CLIENT)
+	 public BlockRenderLayer getBlockLayer()
+	 {
+		 return BlockRenderLayer.CUTOUT;
+	 }
+
+	 @Override
+	 public void onFallenUpon(World worldIn, BlockPos pos, Entity entityIn, float fallDistance)
+	 {
+		 return;
+	 }
+
+	 @Override
+	 public void onLanded(World worldIn, Entity entityIn)
+	 {
+		 return;
+	 }
+
+	 @Override
+	 protected BlockStateContainer createBlockState()
+	 {
+		 return new BlockStateContainer(this, new IProperty[0]);
+	 }
+	
+
+}
+
+
+==================================================
+
+--- Файл №7 ---
+Путь: main\java\com\susjin\lampmod\init\ModBlocks.java
+--------------------
+package com.susjin.lampmod.init;
+
+import com.susjin.lampmod.blocks.BlockGlowingBricks;
+import com.susjin.lampmod.blocks.BlockLight;
+import com.susjin.lampmod.blocks.BlockLightProvider;
+
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+
+public class ModBlocks {
+	
+	public static Block glowingBricks;
+	public static Block light;
+	public static Block lightprovider;
+	
+	public static void init() {
+		glowingBricks = new BlockGlowingBricks();
+		light = new BlockLight();
+		lightprovider = new BlockLightProvider();
+	}
+	
+	public static void register(){
+		registerBlock(glowingBricks);
+		registerBlock(light);
+		registerBlock(lightprovider);
+	}
+	
+	private static void registerBlock(Block block){
+		GameRegistry.register(block);
+		ItemBlock item = new ItemBlock(block);
+		item.setRegistryName(block.getRegistryName());
+		GameRegistry.register(item);
+	}
+	
+	public static void registerRenders(){
+		registerRender(glowingBricks);
+		registerRender(light);
+		registerRender(lightprovider);
+	}
+	
+	private static void registerRender(Block block){
+		Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(Item.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
+	}
+}
+
+
+
+==================================================
+
+--- Файл №8 ---
+Путь: main\java\com\susjin\lampmod\init\ModCrafting.java
+--------------------
+package com.susjin.lampmod.init;
+
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+
+public class ModCrafting {
+
+	
+	public static void register(){
+		//Blocks
+		GameRegistry.addShapedRecipe(new ItemStack(ModBlocks.glowingBricks, 8), "BBB", "BGB", "BBB", 'B', Blocks.STONEBRICK, 'G', Blocks.GLOWSTONE);
+		GameRegistry.addShapelessRecipe(new ItemStack(ModBlocks.glowingBricks), Blocks.STONEBRICK, Items.GLOWSTONE_DUST);
+		GameRegistry.addShapedRecipe(new ItemStack(ModBlocks.light), "T  ", "G  ", "   ", 'T', ModItems.lamptop, 'G', ModItems.lampbot);
+		
+		//Items
+		GameRegistry.addShapedRecipe(new ItemStack(ModItems.lamptop), "FFF", "F F", "   ", 'F', Items.IRON_INGOT);
+		GameRegistry.addShapedRecipe(new ItemStack(ModItems.lampbot), "GDG", "GDG", "GGG", 'D', Items.DIAMOND, 'G', new ItemStack(Blocks.STAINED_GLASS, 1, 7));
+	}
+}
+
+
+==================================================
+
+--- Файл №9 ---
+Путь: main\java\com\susjin\lampmod\init\ModItems.java
+--------------------
+package com.susjin.lampmod.init;
+
+import com.susjin.lampmod.Reference;
+import com.susjin.lampmod.items.Itemlampbot;
+import com.susjin.lampmod.items.Itemlamptop;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+
+public class ModItems {
+	
+	public static Item lamptop;
+	public static Item lampbot;
+	
+	public static void init() {
+		lamptop = new Itemlamptop();
+		lampbot = new Itemlampbot();
+		
+	}
+	
+	public static void register(){
+		GameRegistry.register(lamptop);
+		GameRegistry.register(lampbot);
+	}
+	
+	public static void registerRenders(){
+		registerRender(lamptop);
+		registerRender(lampbot);
+	}
+	
+	private static void registerRender(Item item){
+		Minecraft.getMinecraft().getRenderItem().getItemModelMesher().register(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+	}
+}
+
+
+==================================================
+
+--- Файл №10 ---
+Путь: main\java\com\susjin\lampmod\items\Itemlampbot.java
+--------------------
+package com.susjin.lampmod.items;
+
+import com.susjin.lampmod.Lamp;
+import com.susjin.lampmod.Reference;
+
+import net.minecraft.item.Item;
+
+public class Itemlampbot extends Item {
+
+	public Itemlampbot() {
+		setUnlocalizedName(Reference.LampItems.LAMPBOT.getUnlocalizedName());
+		setRegistryName(Reference.LampItems.LAMPBOT.getRegistryName());
+		setCreativeTab(Lamp.CREATIVE_TAB);
+	}
+}
+
+
+==================================================
+
+--- Файл №11 ---
+Путь: main\java\com\susjin\lampmod\items\Itemlamptop.java
+--------------------
+package com.susjin.lampmod.items;
+
+import com.susjin.lampmod.Lamp;
+import com.susjin.lampmod.Reference;
+
+import net.minecraft.item.Item;
+
+public class Itemlamptop extends Item {
+	
+	public Itemlamptop() {
+		setUnlocalizedName(Reference.LampItems.LAMPTOP.getUnlocalizedName());
+		setRegistryName(Reference.LampItems.LAMPTOP.getRegistryName());
+		setCreativeTab(Lamp.CREATIVE_TAB);
+	}
+}
+
+
+==================================================
+
+--- Файл №12 ---
+Путь: main\java\com\susjin\lampmod\proxy\ClientProxy.java
+--------------------
+package com.susjin.lampmod.proxy;
+
+import com.susjin.lampmod.init.ModBlocks;
+import com.susjin.lampmod.init.ModItems;
+
+public class ClientProxy implements CommonProxy {
+
+	@Override
+	public void init() {
+		ModItems.registerRenders();
+		ModBlocks.registerRenders();
+	}
+
+}
+
+
+==================================================
+
+--- Файл №13 ---
+Путь: main\java\com\susjin\lampmod\proxy\CommonProxy.java
+--------------------
+package com.susjin.lampmod.proxy;
+
+public interface CommonProxy {
+
+	public void init();
+}
+
+
+==================================================
+
+--- Файл №14 ---
+Путь: main\java\com\susjin\lampmod\proxy\ServerProxy.java
+--------------------
+package com.susjin.lampmod.proxy;
+
+public class ServerProxy implements CommonProxy {
+
+	@Override
+	public void init() {}
+
+}
+
+
+==================================================
+
+--- Файл №15 ---
+Путь: main\java\com\susjin\lampmod\tileentity\TileEntityLight.java
+--------------------
+package com.susjin.lampmod.tileentity;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import net.minecraft.client.renderer.texture.ITickable;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+
+public class TileEntityLight extends TileEntity implements ITickable {
+	
+	private ArrayList<BlockPos> positions;
+	private Iterator<BlockPos> iterator;
+	
+	
+	
+	
+	@Override
+	public void onLoad() {
+		iterator = positions.iterator();
+	}
+	
+	@Override
+	public void tick() {
+		// TODO Auto-generated method stub
+		
+	}
+}
+
+
+==================================================
+
+--- Файл №16 ---
+Путь: main\resources\mcmod.info
+--------------------
+[
+{
+"modid": "slp",
+"name": "Susjin's Lamp Mod",
+"description": "Mod that adds an lamp that can light up a hundred blocks!",
+"version": "1.0",
+"mcversion": "1.10.2",
+"logoFile": "",
+"url": "",
+"updateUrl": "",
+"authors": ["Susjin"],
+"parent":"",
+"screenshots": [],
+"dependencies": []
+}
+]
+
+==================================================
+
+--- Файл №17 ---
+Путь: main\resources\assets\slp\blockstates\BlockGlowingBricks.json
+--------------------
+{
+    "variants": {
+        "normal": { "model": "slp:glowingBricks" }
+    }
+}
+
+==================================================
+
+--- Файл №18 ---
+Путь: main\resources\assets\slp\blockstates\BlockLight.json
+--------------------
+{
+    "variants": {
+        "normal": { "model": "slp:light" }
+    }
+}
+
+==================================================
+
+--- Файл №19 ---
+Путь: main\resources\assets\slp\blockstates\BlockLightProvider.json
+--------------------
+{
+    "variants": {
+        "normal": { "model": "slp:lightprovider" }
+    }
+}
+
+
+==================================================
+
+--- Файл №20 ---
+Путь: main\resources\assets\slp\lang\en_US.lang
+--------------------
+item.lamptop.name=Lamp Top
+item.lampbot.name=Lamp Bot
+
+tile.glowingBricks.name=Glowing Stone Bricks
+tile.light.name=Light
+
+itemGroup.tabLight=Better Lights
+
+==================================================
+
+--- Файл №21 ---
+Путь: main\resources\assets\slp\models\block\glowingBricks.json
+--------------------
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "slp:blocks/glowingBricks"
+    }
+}
+
+==================================================
+
+--- Файл №22 ---
+Путь: main\resources\assets\slp\models\block\light.json
+--------------------
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (http://mrcrayfish.com/modelcreator/)",
+    "parent": "block/block",
+    "textures": {
+        "particle": "slp:blocks/glass_gray",
+        "0": "blocks/coal_block",
+        "1": "blocks/glass_gray",
+        "2": "blocks/diamond_block"
+    },
+    "display": {
+        "gui": {
+            "rotation": [ 30, 225, 0 ],
+            "translation": [ 0, -1, 0],
+            "scale":[ 0.95, 0.95, 0.95 ]
+        },
+        "ground": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 3, 0],
+            "scale":[ 0.4, 0.4, 0.4 ]
+        },
+        "fixed": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 0, 0],
+            "scale":[ 0.5, 0.5, 0.5 ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 75, 45, 0 ],
+            "translation": [ 0, 2.5, 0],
+            "scale": [ 0.6, 0.6, 0.6 ]
+        },
+        "firstperson_righthand": {
+            "rotation": [ 0, 45, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 0.60, 0.60, 0.60 ]
+        },
+        "firstperson_lefthand": {
+            "rotation": [ 0, 225, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 0.60, 0.60, 0.60 ]
+        }
+    },
+    "elements": [
+        {
+            "name": "lamptop1",
+            "from": [ 7.0, 15.0, 7.0 ], 
+            "to": [ 9.0, 16.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+                "east": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+                "south": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+                "west": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+                "up": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+                "down": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 2.0 ] }
+            }
+        },
+        {
+            "name": "lamptop2",
+            "from": [ 6.0, 12.0, 7.0 ], 
+            "to": [ 10.0, 15.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#0", "uv": [ 0.0, 0.0, 4.0, 3.0 ] },
+                "east": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 3.0 ] },
+                "south": { "texture": "#0", "uv": [ 0.0, 0.0, 4.0, 3.0 ] },
+                "west": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 3.0 ] },
+                "up": { "texture": "#0", "uv": [ 0.0, 0.0, 4.0, 2.0 ] },
+                "down": { "texture": "#0", "uv": [ 0.0, 0.0, 4.0, 2.0 ] }
+            }
+        },
+        {
+            "name": "glasstop1",
+            "from": [ 6.0, 11.0, 7.0 ], 
+            "to": [ 7.0, 12.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 6.0, 5.0, 7.0, 6.0 ] },
+                "east": { "texture": "#1", "uv": [ 3.0, 3.0, 5.0, 4.0 ] },
+                "south": { "texture": "#1", "uv": [ 4.0, 3.0, 5.0, 4.0 ] },
+                "west": { "texture": "#1", "uv": [ 12.0, 5.0, 7.0, 8.0 ] },
+                "up": { "texture": "#1", "uv": [ 8.0, 5.0, 9.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 4.0, 9.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "glasstop2",
+            "from": [ 7.0, 11.0, 9.0 ], 
+            "to": [ 9.0, 12.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 4.0, 3.0, 6.0, 4.0 ] },
+                "east": { "texture": "#1", "uv": [ 6.0, 5.0, 7.0, 6.0 ] },
+                "south": { "texture": "#1", "uv": [ 3.0, 4.0, 5.0, 5.0 ] },
+                "west": { "texture": "#1", "uv": [ 7.0, 5.0, 8.0, 6.0 ] },
+                "up": { "texture": "#1", "uv": [ 7.0, 4.0, 9.0, 5.0 ] },
+                "down": { "texture": "#1", "uv": [ 5.0, 5.0, 7.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "glasstop3",
+            "from": [ 9.0, 11.0, 7.0 ], 
+            "to": [ 10.0, 12.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 4.0, 4.0, 5.0, 5.0 ] },
+                "east": { "texture": "#1", "uv": [ 6.0, 6.0, 8.0, 7.0 ] },
+                "south": { "texture": "#1", "uv": [ 4.0, 4.0, 5.0, 5.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 5.0, 8.0, 6.0 ] },
+                "up": { "texture": "#1", "uv": [ 3.0, 5.0, 4.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 6.0, 3.0, 7.0, 5.0 ] }
+            }
+        },
+        {
+            "name": "glasstop4",
+            "from": [ 7.0, 11.0, 6.0 ], 
+            "to": [ 9.0, 12.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 4.0, 4.0, 6.0, 5.0 ] },
+                "east": { "texture": "#1", "uv": [ 5.0, 5.0, 6.0, 6.0 ] },
+                "south": { "texture": "#1", "uv": [ 5.0, 6.0, 7.0, 7.0 ] },
+                "west": { "texture": "#1", "uv": [ 5.0, 5.0, 6.0, 6.0 ] },
+                "up": { "texture": "#1", "uv": [ 4.0, 6.0, 6.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 6.0, 5.0, 8.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "glasstop5",
+            "from": [ 7.0, 10.0, 5.0 ], 
+            "to": [ 9.0, 11.0, 6.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 4.0, 4.0, 6.0, 5.0 ] },
+                "east": { "texture": "#1", "uv": [ 7.0, 5.0, 8.0, 6.0 ] },
+                "south": { "texture": "#1", "uv": [ 4.0, 4.0, 6.0, 5.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 3.0, 7.0, 4.0 ] },
+                "up": { "texture": "#1", "uv": [ 8.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 4.0, 5.0, 6.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "glasstop6",
+            "from": [ 7.0, 10.0, 10.0 ], 
+            "to": [ 9.0, 11.0, 11.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 5.0, 6.0, 7.0, 7.0 ] },
+                "east": { "texture": "#1", "uv": [ 5.0, 4.0, 6.0, 5.0 ] },
+                "south": { "texture": "#1", "uv": [ 4.0, 5.0, 6.0, 6.0 ] },
+                "west": { "texture": "#1", "uv": [ 4.0, 3.0, 5.0, 4.0 ] },
+                "up": { "texture": "#1", "uv": [ 4.0, 6.0, 6.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 5.0, 5.0, 7.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "glasstop7",
+            "from": [ 10.0, 10.0, 7.0 ], 
+            "to": [ 11.0, 11.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 5.0, 6.0, 6.0, 7.0 ] },
+                "east": { "texture": "#1", "uv": [ 4.0, 6.0, -6.0, 7.0 ] },
+                "south": { "texture": "#1", "uv": [ 4.0, 6.0, 5.0, 7.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 7.0, 8.0, 8.0 ] },
+                "up": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 9.0 ] },
+                "down": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 9.0 ] }
+            }
+        },
+        {
+            "name": "glasstop8",
+            "from": [ 5.0, 10.0, 7.0 ], 
+            "to": [ 6.0, 11.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 6.0, 6.0, 7.0, 7.0 ] },
+                "east": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] },
+                "south": { "texture": "#1", "uv": [ 6.0, 7.0, 7.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 5.0, 8.0, 6.0 ] },
+                "up": { "texture": "#1", "uv": [ 5.0, 6.0, 6.0, 8.0 ] },
+                "down": { "texture": "#1", "uv": [ 11.0, 8.0, 12.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "glasstop9",
+            "from": [ 6.0, 10.0, 6.0 ], 
+            "to": [ 7.0, 11.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 10.0, 10.0, 11.0, 11.0 ] },
+                "east": { "texture": "#1", "uv": [ 15.0, 12.0, 16.0, 13.0 ] },
+                "south": { "texture": "#1", "uv": [ 8.0, 12.0, 9.0, 13.0 ] },
+                "west": { "texture": "#1", "uv": [ 12.0, 8.0, 13.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 7.0, 10.0, 8.0 ] },
+                "down": { "texture": "#1", "uv": [ 7.0, 6.0, 8.0, 7.0 ] }
+            }
+        },
+        {
+            "name": "glasstop10",
+            "from": [ 6.0, 10.0, 9.0 ], 
+            "to": [ 7.0, 11.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "glasstop11",
+            "from": [ 9.0, 10.0, 9.0 ], 
+            "to": [ 10.0, 11.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 6.0, 6.0, 7.0, 7.0 ] },
+                "east": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "west": { "texture": "#1", "uv": [ 10.0, 8.0, 11.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] }
+            }
+        },
+        {
+            "name": "glasstop12",
+            "from": [ 9.0, 10.0, 6.0 ], 
+            "to": [ 10.0, 11.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 7.0, 9.0, 8.0, 10.0 ] },
+                "east": { "texture": "#1", "uv": [ 8.0, 7.0, 9.0, 8.0 ] },
+                "south": { "texture": "#1", "uv": [ 8.0, 6.0, 9.0, 7.0 ] },
+                "west": { "texture": "#1", "uv": [ 10.0, 10.0, 11.0, 11.0 ] },
+                "up": { "texture": "#1", "uv": [ 11.0, 9.0, 12.0, 10.0 ] },
+                "down": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 6.0, 5.0, 5.0 ], 
+            "to": [ 7.0, 10.0, 6.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 6.0, 5.0, 7.0, 10.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 10.0, 10.0, 15.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 12.0 ] },
+                "west": { "texture": "#1", "uv": [ 8.0, 7.0, 9.0, 12.0 ] },
+                "up": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "down": { "texture": "#1", "uv": [ 6.0, 3.0, 7.0, 4.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 5.0, 5.0, 6.0 ], 
+            "to": [ 6.0, 10.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 6.0, 5.0, 7.0, 10.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 13.0 ] },
+                "south": { "texture": "#1", "uv": [ 10.0, 9.0, 11.0, 14.0 ] },
+                "west": { "texture": "#1", "uv": [ 9.0, 9.0, 10.0, 14.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 9.0, 10.0, 10.0 ] },
+                "down": { "texture": "#1", "uv": [ 9.0, 7.0, 10.0, 8.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 4.0, 5.0, 7.0 ], 
+            "to": [ 5.0, 10.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 6.0, 9.0, 11.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 7.0, 11.0, 12.0 ] },
+                "south": { "texture": "#1", "uv": [ 6.0, 6.0, 7.0, 11.0 ] },
+                "west": { "texture": "#1", "uv": [ 7.0, 5.0, 9.0, 10.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 4.0, 7.0, 6.0 ] },
+                "down": { "texture": "#1", "uv": [ 6.0, 5.0, 7.0, 7.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 11.0, 5.0, 7.0 ], 
+            "to": [ 12.0, 10.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 7.0, 5.0, 8.0, 10.0 ] },
+                "east": { "texture": "#1", "uv": [ 6.0, 4.0, 8.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 8.0, 4.0, 9.0, 9.0 ] },
+                "west": { "texture": "#1", "uv": [ 4.0, 5.0, 6.0, 10.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 7.0, 7.0, 9.0 ] },
+                "down": { "texture": "#1", "uv": [ 6.0, 4.0, 7.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 5.0, 11.0 ], 
+            "to": [ 9.0, 10.0, 12.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 7.0, 3.0, 9.0, 8.0 ] },
+                "east": { "texture": "#1", "uv": [ 10.0, 6.0, 11.0, 11.0 ] },
+                "south": { "texture": "#1", "uv": [ 10.0, 4.0, 12.0, 9.0 ] },
+                "west": { "texture": "#1", "uv": [ 7.0, 5.0, 8.0, 10.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 5.0, 8.0, 6.0 ] },
+                "down": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 10.0, 5.0, 6.0 ], 
+            "to": [ 11.0, 10.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 5.0, 9.0, 10.0 ] },
+                "east": { "texture": "#1", "uv": [ 8.0, 7.0, 9.0, 12.0 ] },
+                "south": { "texture": "#1", "uv": [ 5.0, 6.0, 6.0, 11.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 7.0, 7.0, 12.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 5.0, 7.0, 6.0 ] },
+                "down": { "texture": "#1", "uv": [ 4.0, 5.0, 5.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 9.0, 5.0, 5.0 ], 
+            "to": [ 10.0, 10.0, 6.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 7.0, 4.0, 8.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 6.0, 4.0, 7.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 5.0, 8.0, 10.0 ] },
+                "west": { "texture": "#1", "uv": [ 7.0, 6.0, 8.0, 11.0 ] },
+                "up": { "texture": "#1", "uv": [ 5.0, 4.0, 6.0, 5.0 ] },
+                "down": { "texture": "#1", "uv": [ 9.0, 7.0, 10.0, 8.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 9.0, 5.0, 10.0 ], 
+            "to": [ 10.0, 10.0, 11.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 6.0, 6.0, 7.0, 11.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 11.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 8.0, 8.0, 13.0 ] },
+                "west": { "texture": "#1", "uv": [ 4.0, 6.0, 5.0, 11.0 ] },
+                "up": { "texture": "#1", "uv": [ 5.0, 3.0, 6.0, 4.0 ] },
+                "down": { "texture": "#1", "uv": [ 13.0, 5.0, 14.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 10.0, 5.0, 9.0 ], 
+            "to": [ 11.0, 10.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 5.0, 4.0, 6.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 7.0, 4.0, 8.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 4.0, 8.0, 9.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 6.0, 7.0, 11.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "down": { "texture": "#1", "uv": [ 10.0, 5.0, 11.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 5.0, 5.0, 9.0 ], 
+            "to": [ 6.0, 10.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 5.0, 9.0, 10.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 13.0 ] },
+                "south": { "texture": "#1", "uv": [ 5.0, 6.0, 6.0, 11.0 ] },
+                "west": { "texture": "#1", "uv": [ 5.0, 5.0, 6.0, 10.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 7.0, 7.0, 8.0 ] },
+                "down": { "texture": "#1", "uv": [ 9.0, 5.0, 10.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 6.0, 5.0, 10.0 ], 
+            "to": [ 7.0, 10.0, 11.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 9.0, 4.0, 10.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 5.0, 9.0, 11.0 ] },
+                "south": { "texture": "#1", "uv": [ 13.0, 3.0, 1.0, 13.0 ] },
+                "west": { "texture": "#1", "uv": [ 16.0, 4.0, 1.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 10.0 ] },
+                "down": { "texture": "#1", "uv": [ 7.0, 4.0, 8.0, 5.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 5.0, 4.0 ], 
+            "to": [ 9.0, 10.0, 5.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 7.0, 3.0, 9.0, 8.0 ] },
+                "east": { "texture": "#1", "uv": [ 10.0, 6.0, 11.0, 11.0 ] },
+                "south": { "texture": "#1", "uv": [ 10.0, 4.0, 12.0, 9.0 ] },
+                "west": { "texture": "#1", "uv": [ 7.0, 5.0, 8.0, 10.0 ] },
+                "up": { "texture": "#1", "uv": [ 6.0, 5.0, 8.0, 6.0 ] },
+                "down": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] }
+            }
+        },
+        {
+            "name": "Diamondmiddle",
+            "from": [ 7.0, 6.0, 7.0 ], 
+            "to": [ 9.0, 9.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#2", "uv": [ 6.0, 4.0, 8.0, 7.0 ] },
+                "east": { "texture": "#2", "uv": [ 6.0, 4.0, 8.0, 7.0 ] },
+                "south": { "texture": "#2", "uv": [ 5.0, 4.0, 7.0, 7.0 ] },
+                "west": { "texture": "#2", "uv": [ 5.0, 4.0, 7.0, 7.0 ] },
+                "up": { "texture": "#2", "uv": [ 5.0, 5.0, 7.0, 7.0 ] },
+                "down": { "texture": "#2", "uv": [ 5.0, 4.0, 7.0, 6.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 6.0, 4.0, 9.0 ], 
+            "to": [ 7.0, 5.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 6.0, 4.0, 6.0 ], 
+            "to": [ 7.0, 5.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 9.0, 4.0, 6.0 ], 
+            "to": [ 10.0, 5.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 9.0, 4.0, 9.0 ], 
+            "to": [ 10.0, 5.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 4.0, 10.0 ], 
+            "to": [ 9.0, 5.0, 11.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 10.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 11.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 10.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 4.0, 5.0 ], 
+            "to": [ 9.0, 5.0, 6.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 10.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 11.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 10.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 10.0, 4.0, 7.0 ], 
+            "to": [ 11.0, 5.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 11.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 8.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 8.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 11.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 5.0, 4.0, 7.0 ], 
+            "to": [ 6.0, 5.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 9.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 11.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 8.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 8.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 10.0, 8.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 9.0, 11.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 6.0, 3.0, 7.0 ], 
+            "to": [ 10.0, 4.0, 9.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 12.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 11.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 11.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 8.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 13.0, 8.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 12.0, 11.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 3.0, 6.0 ], 
+            "to": [ 9.0, 4.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 10.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 11.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 10.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 3.0, 9.0 ], 
+            "to": [ 9.0, 4.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#1", "uv": [ 8.0, 8.0, 10.0, 9.0 ] },
+                "east": { "texture": "#1", "uv": [ 9.0, 8.0, 10.0, 9.0 ] },
+                "south": { "texture": "#1", "uv": [ 7.0, 7.0, 9.0, 8.0 ] },
+                "west": { "texture": "#1", "uv": [ 6.0, 8.0, 7.0, 9.0 ] },
+                "up": { "texture": "#1", "uv": [ 9.0, 6.0, 11.0, 7.0 ] },
+                "down": { "texture": "#1", "uv": [ 8.0, 9.0, 10.0, 10.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 12.0, 9.0 ], 
+            "to": [ 9.0, 15.0, 10.0 ], 
+            "faces": {
+                "north": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 3.0 ] },
+                "east": { "texture": "#0", "uv": [ 0.0, 0.0, 1.0, 3.0 ] },
+                "south": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 3.0 ] },
+                "west": { "texture": "#0", "uv": [ 0.0, 0.0, 1.0, 3.0 ] },
+                "up": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+                "down": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] }
+            }
+        },
+        {
+            "name": "Cube",
+            "from": [ 7.0, 12.0, 6.0 ], 
+            "to": [ 9.0, 15.0, 7.0 ], 
+            "faces": {
+                "north": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 3.0 ] },
+                "east": { "texture": "#0", "uv": [ 0.0, 0.0, 1.0, 3.0 ] },
+                "south": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 3.0 ] },
+                "west": { "texture": "#0", "uv": [ 0.0, 0.0, 1.0, 3.0 ] },
+                "up": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+                "down": { "texture": "#0", "uv": [ 0.0, 0.0, 2.0, 1.0 ] }
+            }
+        }
+    ]
+}
+
+==================================================
+
+--- Файл №23 ---
+Путь: main\resources\assets\slp\models\block\lightprovider.json
+--------------------
+{      
+
+    "textures": 
+    {
+        "pole": "blocks/log_big_oak"
+    },
+   "elements":[  
+      {  
+         "__comment":"basically make it have no surface area so it is invisible", 
+         "from":[ 0.5, 0.5, 0.5 ],
+         "to":[ 0.5, 0.5, 0.5 ],
+         "faces":{  
+            "down":{ "uv": [ 0, 0, 15, 15 ], "texture":"#pole" },
+            "up":{ "uv": [ 0, 0, 15, 15 ], "texture": "#pole" },
+            "north":{ "uv": [ 0, 0, 15, 15 ], "texture":"#pole" },
+            "south":{ "uv": [ 0, 0, 15, 15 ], "texture":"#pole" },
+            "west":{ "uv": [ 0, 0, 15, 15 ], "texture":"#pole" },
+            "east":{ "uv": [ 0, 0, 15, 15 ], "texture":"#pole" }
+         }
+      }
+   ]
+}
+
+==================================================
+
+--- Файл №24 ---
+Путь: main\resources\assets\slp\models\item\BlockGlowingBricks.json
+--------------------
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "slp:blocks/glowingBricks"
+    }
+}
+
+==================================================
+
+--- Файл №25 ---
+Путь: main\resources\assets\slp\models\item\BlockLight.json
+--------------------
+{
+    "parent": "slp:block/light"
+}
+
+==================================================
+
+--- Файл №26 ---
+Путь: main\resources\assets\slp\models\item\BlockLightProvider.json
+--------------------
+{
+    "parent": "slp:block/lightprovider",
+    "display": {
+        "thirdperson": {
+            "rotation": [ 10, -45, 170 ],
+            "translation": [ 0, 1.5, -2.75 ],
+            "scale": [ 0.375, 0.375, 0.375 ]
+        }
+    }
+}
+
+==================================================
+
+--- Файл №27 ---
+Путь: main\resources\assets\slp\models\item\Itemlampbot.json
+--------------------
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "slp:items/lampbot"
+    }
+}
+
+==================================================
+
+--- Файл №28 ---
+Путь: main\resources\assets\slp\models\item\Itemlamptop.json
+--------------------
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "slp:items/lamptop"
+    }
+}
+
+==================================================
+
+--- Файл №29 ---
+Путь: main\resources\assets\slp\textures\blocks\glass_gray.png
+--------------------
+[Это бинарный файл. Отображение содержимого невозможно.]
+[Расширение: .png]
+[Размер: 202 байт]
+
+==================================================
+
+--- Файл №30 ---
+Путь: main\resources\assets\slp\textures\blocks\glowingBricks.png
+--------------------
+[Это бинарный файл. Отображение содержимого невозможно.]
+[Расширение: .png]
+[Размер: 402 байт]
+
+==================================================
+
+--- Файл №31 ---
+Путь: main\resources\assets\slp\textures\items\lampbot.png
+--------------------
+[Это бинарный файл. Отображение содержимого невозможно.]
+[Расширение: .png]
+[Размер: 302 байт]
+
+==================================================
+
+--- Файл №32 ---
+Путь: main\resources\assets\slp\textures\items\lamptop.png
+--------------------
+[Это бинарный файл. Отображение содержимого невозможно.]
+[Расширение: .png]
+[Размер: 180 байт]
+
+==================================================
+

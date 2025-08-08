@@ -1,0 +1,619 @@
+Анализ содержимого папки: C:\Users\User\Desktop\mody\extendedreach-1.1.1\src
+==================================================
+
+--- Файл №1 ---
+Путь: main\java\mchorse\extendedreach\ExtendedReach.java
+--------------------
+package mchorse.extendedreach;
+
+import mchorse.mclib.McLib;
+import mchorse.mclib.config.ConfigBuilder;
+import mchorse.mclib.config.values.ValueBoolean;
+import mchorse.mclib.config.values.ValueDouble;
+import mchorse.mclib.config.values.ValueFloat;
+import mchorse.mclib.events.RegisterConfigEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+/**
+ * Extended reach mod
+ * 
+ * Allows player to configure the block, item or entity reach
+ */
+@Mod.EventBusSubscriber
+@Mod(modid = ExtendedReach.MOD_ID, name = "ExtendedReach", version = ExtendedReach.VERSION, dependencies = "required-after:mclib@[%MCLIB%,)", updateJSON = "https://raw.githubusercontent.com/mchorse/extendedreach/master/version.json")
+public class ExtendedReach
+{
+    public static final String MOD_ID = "extendedreach";
+    public static final String VERSION = "%VERSION%";
+
+    public static ValueFloat reach;
+
+    @SubscribeEvent
+    public void onConfigRegister(RegisterConfigEvent event)
+    {
+        ConfigBuilder builder = event.createBuilder(MOD_ID);
+
+        reach = builder.category("general").getFloat("reach", 5F, 0F, 1024F);
+        reach.syncable();
+    }
+
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event)
+    {
+        McLib.EVENT_BUS.register(this);
+    }
+}
+
+==================================================
+
+--- Файл №2 ---
+Путь: main\java\mchorse\extendedreach\core\ExtendedReachCM.java
+--------------------
+package mchorse.extendedreach.core;
+
+import java.util.Map;
+
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.SortingIndex;
+
+@Name("Extended Reach core mod")
+@MCVersion("1.12.2")
+@SortingIndex(1)
+public class ExtendedReachCM implements IFMLLoadingPlugin
+{
+    @Override
+    public String[] getASMTransformerClass()
+    {
+        return new String[] {ExtendedReachCMClassTransformer.class.getName()};
+    }
+
+    @Override
+    public String getModContainerClass()
+    {
+        return ExtendedReachCMInfo.class.getName();
+    }
+
+    @Override
+    public String getSetupClass()
+    {
+        return null;
+    }
+
+    @Override
+    public void injectData(Map<String, Object> data)
+    {}
+
+    @Override
+    public String getAccessTransformerClass()
+    {
+        return null;
+    }
+}
+
+==================================================
+
+--- Файл №3 ---
+Путь: main\java\mchorse\extendedreach\core\ExtendedReachCMClassTransformer.java
+--------------------
+package mchorse.extendedreach.core;
+
+import mchorse.extendedreach.core.transformers.EntityRendererTransformer;
+import mchorse.extendedreach.core.transformers.ItemTransformer;
+import mchorse.extendedreach.core.transformers.NetHandlerPlayServerTransformer;
+import mchorse.extendedreach.core.transformers.PlayerControllerMPTransformer;
+import mchorse.extendedreach.core.transformers.PlayerInteractionManagerTransformer;
+import mchorse.mclib.utils.coremod.CoreClassTransformer;
+
+public class ExtendedReachCMClassTransformer extends CoreClassTransformer
+{
+    private PlayerControllerMPTransformer playerControllerMP = new PlayerControllerMPTransformer();
+    private PlayerInteractionManagerTransformer playerInteractionManager = new PlayerInteractionManagerTransformer();
+    private EntityRendererTransformer entityRenderer = new EntityRendererTransformer();
+    private NetHandlerPlayServerTransformer netHandlerPlayServer = new NetHandlerPlayServerTransformer();
+    private ItemTransformer item = new ItemTransformer();
+
+    @Override
+    public byte[] transform(String name, String transformedName, byte[] basicClass)
+    {
+        if (checkName(name, "bsa", "net.minecraft.client.multiplayer.PlayerControllerMP"))
+        {
+            System.out.println("Extended Reach: Transforming PlayerControllerMP class (" + name + ")");
+
+            return this.playerControllerMP.transform(name, basicClass);
+        }
+        else if (checkName(name, "or", "net.minecraft.server.management.PlayerInteractionManager"))
+        {
+            System.out.println("Extended Reach: Transforming PlayerInteractionManager class (" + name + ")");
+
+            return this.playerInteractionManager.transform(name, basicClass);
+        }
+        else if (checkName(name, "buq", "net.minecraft.client.renderer.EntityRenderer"))
+        {
+            System.out.println("Extended Reach: Transforming EntityRenderer class (" + name + ")");
+
+            return this.entityRenderer.transform(name, basicClass);
+        }
+        else if (checkName(name, "pa", "net.minecraft.network.NetHandlerPlayServer"))
+        {
+            System.out.println("Extended Reach: Transforming NetHandlerPlayServer class (" + name + ")");
+
+            return this.netHandlerPlayServer.transform(name, basicClass);
+        }
+        else if (checkName(name, "", "net.minecraft.item.Item"))
+        {
+            System.out.println("Extended Reach: Transforming Item class (" + name + ")");
+
+            return this.item.transform(name, basicClass);
+        }
+
+        return basicClass;
+    }
+}
+
+==================================================
+
+--- Файл №4 ---
+Путь: main\java\mchorse\extendedreach\core\ExtendedReachCMInfo.java
+--------------------
+package mchorse.extendedreach.core;
+
+import net.minecraftforge.fml.common.DummyModContainer;
+
+public class ExtendedReachCMInfo extends DummyModContainer
+{
+    @Override
+    public String getName()
+    {
+        return "Extended Reach core mod";
+    }
+
+    @Override
+    public String getModId()
+    {
+        return "extendedreach_core";
+    }
+
+    @Override
+    public Object getMod()
+    {
+        return null;
+    }
+
+    @Override
+    public String getVersion()
+    {
+        return "%VERSION%";
+    }
+}
+
+==================================================
+
+--- Файл №5 ---
+Путь: main\java\mchorse\extendedreach\core\transformers\EntityRendererTransformer.java
+--------------------
+package mchorse.extendedreach.core.transformers;
+
+import java.util.Iterator;
+
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+
+import mchorse.mclib.utils.coremod.ClassTransformer;
+
+public class EntityRendererTransformer extends ClassTransformer
+{
+    @Override
+    public void process(String name, ClassNode node)
+    {
+        for (MethodNode method : node.methods)
+        {
+            String methodName = this.checkName(method, "a", "(F)V", "getMouseOver", "(F)V");
+
+            if (methodName != null)
+            {
+                this.processGetMouseOver(method);
+            }
+        }
+    }
+
+    private void processGetMouseOver(MethodNode method)
+    {
+        Iterator<AbstractInsnNode> it = method.instructions.iterator();
+        boolean found = false;
+
+        while (it.hasNext())
+        {
+            AbstractInsnNode node = it.next();
+
+            if (found)
+            {
+                it.remove();
+                System.out.println("Extended Reach: successfully patched getMouseOver!");
+
+                break;
+            }
+
+            if (node.getOpcode() == Opcodes.LDC)
+            {
+                LdcInsnNode ldc = (LdcInsnNode) node;
+
+                if (ldc.cst.equals(6.0D))
+                {
+                    it.remove();
+                    found = true;
+                }
+            }
+        }
+    }
+}
+
+==================================================
+
+--- Файл №6 ---
+Путь: main\java\mchorse\extendedreach\core\transformers\ItemTransformer.java
+--------------------
+package mchorse.extendedreach.core.transformers;
+
+import java.util.Iterator;
+
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
+
+import mchorse.mclib.utils.coremod.ClassTransformer;
+import mchorse.mclib.utils.coremod.CoreClassTransformer;
+
+public class ItemTransformer extends ClassTransformer
+{
+    public static InsnList GET_REACH;
+    public static InsnList GET_REACH_OBF;
+
+    static
+    {
+        GET_REACH = new InsnList();
+        GET_REACH.add(new FieldInsnNode(Opcodes.GETSTATIC, "net/minecraft/entity/player/EntityPlayer", "REACH_DISTANCE", "Lnet/minecraft/entity/ai/attributes/IAttribute;"));
+        GET_REACH.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "net/minecraft/entity/player/EntityPlayer", "getEntityAttribute", "(Lnet/minecraft/entity/ai/attributes/IAttribute;)Lnet/minecraft/entity/ai/attributes/IAttributeInstance;", false));
+        GET_REACH.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "net/minecraft/entity/ai/attributes/IAttributeInstance", "getAttributeValue", "()D", true));
+
+        GET_REACH_OBF = new InsnList();
+        GET_REACH_OBF.add(new FieldInsnNode(Opcodes.GETSTATIC, "aed", "REACH_DISTANCE", "Lwc;"));
+        GET_REACH_OBF.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "aed", "a", "(Lwc;)Lwd;", false));
+        GET_REACH_OBF.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "wd", "e", "()D", true));
+    }
+
+    public static void processBlockReach(MethodNode method)
+    {
+        Iterator<AbstractInsnNode> it = method.instructions.iterator();
+        InsnList list = CoreClassTransformer.obfuscated ? GET_REACH_OBF : GET_REACH;
+        AbstractInsnNode first = list.getFirst();
+        int counter = 0;
+
+        while (it.hasNext())
+        {
+            AbstractInsnNode node = it.next();
+
+            if (equals(node, first))
+            {
+                if (first == list.getLast())
+                {
+                    AbstractInsnNode target = node.getPrevious().getPrevious().getPrevious();
+
+                    /* Fixes shit that has ALOAD in front */
+                    if (target.getPrevious() instanceof VarInsnNode)
+                    {
+                        target = target.getPrevious();
+                    }
+
+                    while (node != target)
+                    {
+                        AbstractInsnNode next = target.getNext();
+                        method.instructions.remove(target);
+                        target = next;
+                    }
+
+                    method.instructions.insert(target, new MethodInsnNode(Opcodes.INVOKESTATIC, "mchorse/extendedreach/utils/BlockReach", "getDoubleReach", "()D", false));
+                    method.instructions.remove(target);
+
+                    first = list.getFirst();
+                    counter++;
+                }
+                else
+                {
+                    first = first.getNext();
+                }
+            }
+            else
+            {
+                first = list.getFirst();
+            }
+        }
+
+        if (counter > 0)
+        {
+            System.out.println("Extended Reach: successfully patched method " + method.name + " for REACH_DISTANCE!");
+        }
+    }
+
+    public static boolean equals(AbstractInsnNode first, AbstractInsnNode second)
+    {
+        if (first.getOpcode() == second.getOpcode())
+        {
+            if (first instanceof FieldInsnNode)
+            {
+                FieldInsnNode field1 = (FieldInsnNode) first;
+                FieldInsnNode field2 = (FieldInsnNode) second;
+
+                return field1.name.equals(field2.name) && field1.owner.equals(field2.owner) && field1.desc.equals(field2.desc);
+            }
+            else if (first instanceof MethodInsnNode)
+            {
+                MethodInsnNode method1 = (MethodInsnNode) first;
+                MethodInsnNode method2 = (MethodInsnNode) second;
+
+                return method1.name.equals(method2.name) && method1.desc.equals(method2.desc) && method1.itf == method2.itf;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public void process(String name, ClassNode node)
+    {
+        for (MethodNode method : node.methods)
+        {
+            String methodName = this.checkName(method, "a", "(Lamu;Laed;Z)Lbhc;", "rayTrace", "(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Z)Lnet/minecraft/util/math/RayTraceResult;");
+
+            if (methodName != null)
+            {
+                processBlockReach(method);
+            }
+        }
+    }
+}
+
+==================================================
+
+--- Файл №7 ---
+Путь: main\java\mchorse\extendedreach\core\transformers\NetHandlerPlayServerTransformer.java
+--------------------
+package mchorse.extendedreach.core.transformers;
+
+import java.util.Iterator;
+
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+
+import mchorse.mclib.utils.coremod.ClassTransformer;
+
+public class NetHandlerPlayServerTransformer extends ClassTransformer
+{
+    @Override
+    public void process(String name, ClassNode node)
+    {
+        for (MethodNode method : node.methods)
+        {
+            String methodName = this.checkName(method, "a", "(Lli;)V", "processUseEntity", "(Lnet/minecraft/network/play/client/CPacketUseEntity;)V");
+
+            if (methodName != null)
+            {
+                this.processGetMouseOver(method);
+            }
+            else
+            {
+                ItemTransformer.processBlockReach(method);
+            }
+        }
+    }
+
+    private void processGetMouseOver(MethodNode method)
+    {
+        Iterator<AbstractInsnNode> it = method.instructions.iterator();
+
+        Double shortRange = Double.valueOf(9.0D);
+        Double longRange = Double.valueOf(36.0D);
+        int counter = 0;
+
+        while (it.hasNext())
+        {
+            AbstractInsnNode node = it.next();
+
+            if (node.getOpcode() == Opcodes.LDC)
+            {
+                LdcInsnNode ldc = (LdcInsnNode) node;
+
+                if (ldc.cst.equals(shortRange) || ldc.cst.equals(longRange))
+                {
+                    method.instructions.insert(node, new MethodInsnNode(Opcodes.INVOKESTATIC, "mchorse/extendedreach/utils/BlockReach", "getDoubleReachSq", "()D", false));
+                    it.remove();
+
+                    counter++;
+                }
+            }
+        }
+
+        if (counter == 2)
+        {
+            System.out.println("Extended Reach: successfully patched processUseEntity!");
+        }
+    }
+}
+
+==================================================
+
+--- Файл №8 ---
+Путь: main\java\mchorse\extendedreach\core\transformers\PlayerControllerMPTransformer.java
+--------------------
+package mchorse.extendedreach.core.transformers;
+
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+
+import mchorse.mclib.utils.coremod.ClassTransformer;
+
+public class PlayerControllerMPTransformer extends ClassTransformer
+{
+    @Override
+    public void process(String name, ClassNode node)
+    {
+        for (MethodNode method : node.methods)
+        {
+            String methodName = this.checkName(method, "d", "()F", "getBlockReachDistance", "()F");
+
+            if (methodName != null)
+            {
+                this.processGetBlockReachDistance(method);
+            }
+
+            methodName = this.checkName(method, "i", "()Z", "extendedReach", "()Z");
+
+            if (methodName != null)
+            {
+                this.processExtendedReach(method);
+            }
+        }
+    }
+
+    private void processGetBlockReachDistance(MethodNode method)
+    {
+        InsnList list = new InsnList();
+        String desc = "()F";
+
+        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "mchorse/extendedreach/utils/BlockReach", "getReach", desc, false));
+        list.add(new InsnNode(Opcodes.FRETURN));
+
+        method.instructions.clear();
+        method.instructions.insert(list);
+
+        System.out.println("Extended Reach: successfully patched getBlockReachDistance!");
+    }
+
+    private void processExtendedReach(MethodNode method)
+    {
+        InsnList list = new InsnList();
+        String desc = "()Z";
+
+        list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "mchorse/extendedreach/utils/BlockReach", "isExtended", desc, false));
+        list.add(new InsnNode(Opcodes.IRETURN));
+
+        method.instructions.clear();
+        method.instructions.insert(list);
+
+        System.out.println("Extended Reach: successfully patched extendedReach!");
+    }
+}
+
+==================================================
+
+--- Файл №9 ---
+Путь: main\java\mchorse\extendedreach\core\transformers\PlayerInteractionManagerTransformer.java
+--------------------
+package mchorse.extendedreach.core.transformers;
+
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
+
+import mchorse.mclib.utils.coremod.ClassTransformer;
+
+public class PlayerInteractionManagerTransformer extends ClassTransformer
+{
+    @Override
+    public void process(String name, ClassNode node)
+    {
+        for (MethodNode method : node.methods)
+        {
+            ItemTransformer.processBlockReach(method);
+        }
+    }
+}
+
+==================================================
+
+--- Файл №10 ---
+Путь: main\java\mchorse\extendedreach\utils\BlockReach.java
+--------------------
+package mchorse.extendedreach.utils;
+
+import mchorse.extendedreach.ExtendedReach;
+
+/**
+ * Block reach static util class
+ * 
+ * This class is mostly used for ASM hooks
+ */
+public class BlockReach
+{
+    public static float getReach()
+    {
+        return ExtendedReach.reach.get();
+    }
+
+    public static double getDoubleReach()
+    {
+        return getReach();
+    }
+
+    public static double getDoubleReachSq()
+    {
+        return getDoubleReach() * getDoubleReach();
+    }
+
+    public static boolean isExtended()
+    {
+        return true;
+    }
+}
+
+==================================================
+
+--- Файл №11 ---
+Путь: main\resources\mcmod.info
+--------------------
+[
+    {
+        "modid": "extendedreach",
+        "name": "Extended Reach",
+        "description": "Allows player to configure the block, item or entity reach",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "https://minecraft.curseforge.com/projects/extended-reach/",
+        "updateJSON": "https://raw.githubusercontent.com/mchorse/extendedreach/master/version.json",
+        "authorList": ["mchorse"]
+    }
+]
+
+==================================================
+
+--- Файл №12 ---
+Путь: main\resources\assets\extendedreach\lang\en_US.lang
+--------------------
+extendedreach.config.title=Extended Reach
+extendedreach.config.general.title=General
+extendedreach.config.general.tooltip=Extended Reach mod's general mod options
+
+extendedreach.config.general.reach=Reach distance
+extendedreach.config.comments.general.reach=How far can players on the server can reach, i.e. hit entities, break and interact with blocks
+
+==================================================
+

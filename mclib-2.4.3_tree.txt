@@ -1,0 +1,407 @@
+src
+└── main
+    ├── java
+    │   └── mchorse
+    │       └── mclib
+    │           ├── ClientProxy.java
+    │           ├── CommonProxy.java
+    │           ├── McLib.java
+    │           ├── client
+    │           │   ├── Draw.java
+    │           │   ├── InputRenderer.java
+    │           │   ├── KeyboardHandler.java
+    │           │   ├── gui
+    │           │   │   ├── framework
+    │           │   │   │   ├── GuiBase.java
+    │           │   │   │   ├── elements
+    │           │   │   │   │   ├── GuiCollapseSection.java
+    │           │   │   │   │   ├── GuiConfirmationScreen.java
+    │           │   │   │   │   ├── GuiDelegateElement.java
+    │           │   │   │   │   ├── GuiElement.java
+    │           │   │   │   │   ├── GuiElements.java
+    │           │   │   │   │   ├── GuiModelRenderer.java
+    │           │   │   │   │   ├── GuiPanelBase.java
+    │           │   │   │   │   ├── GuiScrollElement.java
+    │           │   │   │   │   ├── IFocusedGuiElement.java
+    │           │   │   │   │   ├── IGuiElement.java
+    │           │   │   │   │   ├── IViewport.java
+    │           │   │   │   │   ├── buttons
+    │           │   │   │   │   │   ├── GuiButtonElement.java
+    │           │   │   │   │   │   ├── GuiCirculateElement.java
+    │           │   │   │   │   │   ├── GuiClickElement.java
+    │           │   │   │   │   │   ├── GuiIconElement.java
+    │           │   │   │   │   │   ├── GuiSlotElement.java
+    │           │   │   │   │   │   └── GuiToggleElement.java
+    │           │   │   │   │   ├── context
+    │           │   │   │   │   │   ├── GuiContextMenu.java
+    │           │   │   │   │   │   └── GuiSimpleContextMenu.java
+    │           │   │   │   │   ├── input
+    │           │   │   │   │   │   ├── GuiBaseTextElement.java
+    │           │   │   │   │   │   ├── GuiColorElement.java
+    │           │   │   │   │   │   ├── GuiKeybindElement.java
+    │           │   │   │   │   │   ├── GuiKeybinds.java
+    │           │   │   │   │   │   ├── GuiTextElement.java
+    │           │   │   │   │   │   ├── GuiTexturePicker.java
+    │           │   │   │   │   │   ├── GuiTrackpadElement.java
+    │           │   │   │   │   │   ├── GuiTransformations.java
+    │           │   │   │   │   │   ├── color
+    │           │   │   │   │   │   │   ├── GuiColorPalette.java
+    │           │   │   │   │   │   │   └── GuiColorPicker.java
+    │           │   │   │   │   │   └── multiskin
+    │           │   │   │   │   │       └── GuiMultiSkinEditor.java
+    │           │   │   │   │   ├── keyframes
+    │           │   │   │   │   │   ├── GuiDopeSheet.java
+    │           │   │   │   │   │   ├── GuiGraphView.java
+    │           │   │   │   │   │   ├── GuiKeyframeElement.java
+    │           │   │   │   │   │   ├── GuiKeyframeInterpolationsList.java
+    │           │   │   │   │   │   ├── GuiKeyframesEditor.java
+    │           │   │   │   │   │   ├── GuiSheet.java
+    │           │   │   │   │   │   ├── IAxisConverter.java
+    │           │   │   │   │   │   └── Selection.java
+    │           │   │   │   │   ├── list
+    │           │   │   │   │   │   ├── GuiFolderEntryListElement.java
+    │           │   │   │   │   │   ├── GuiInterpolationList.java
+    │           │   │   │   │   │   ├── GuiLabelListElement.java
+    │           │   │   │   │   │   ├── GuiLabelSearchListElement.java
+    │           │   │   │   │   │   ├── GuiListElement.java
+    │           │   │   │   │   │   ├── GuiResourceLocationListElement.java
+    │           │   │   │   │   │   ├── GuiSearchListElement.java
+    │           │   │   │   │   │   ├── GuiStringListElement.java
+    │           │   │   │   │   │   └── GuiStringSearchListElement.java
+    │           │   │   │   │   ├── modals
+    │           │   │   │   │   │   ├── GuiConfirmModal.java
+    │           │   │   │   │   │   ├── GuiListModal.java
+    │           │   │   │   │   │   ├── GuiMessageModal.java
+    │           │   │   │   │   │   ├── GuiModal.java
+    │           │   │   │   │   │   ├── GuiPopUpModal.java
+    │           │   │   │   │   │   └── GuiPromptModal.java
+    │           │   │   │   │   └── utils
+    │           │   │   │   │       ├── GuiCanvas.java
+    │           │   │   │   │       ├── GuiCanvasEditor.java
+    │           │   │   │   │       ├── GuiContext.java
+    │           │   │   │   │       ├── GuiDraw.java
+    │           │   │   │   │       ├── GuiDrawable.java
+    │           │   │   │   │       ├── GuiInventoryElement.java
+    │           │   │   │   │       ├── GuiLabel.java
+    │           │   │   │   │       ├── GuiViewportStack.java
+    │           │   │   │   │       ├── ITextColoring.java
+    │           │   │   │   │       ├── IViewportStack.java
+    │           │   │   │   │       └── IconContainer.java
+    │           │   │   │   └── tooltips
+    │           │   │   │       ├── GuiTooltip.java
+    │           │   │   │       ├── ITooltip.java
+    │           │   │   │       ├── InterpolationTooltip.java
+    │           │   │   │       ├── LabelTooltip.java
+    │           │   │   │       └── styles
+    │           │   │   │           ├── DarkTooltipStyle.java
+    │           │   │   │           ├── LightTooltipStyle.java
+    │           │   │   │           └── TooltipStyle.java
+    │           │   │   ├── mclib
+    │           │   │   │   ├── GuiAbstractDashboard.java
+    │           │   │   │   ├── GuiDashboard.java
+    │           │   │   │   ├── GuiDashboardPanel.java
+    │           │   │   │   ├── GuiDashboardPanels.java
+    │           │   │   │   ├── GuiDebugPanel.java
+    │           │   │   │   └── GuiGraphPanel.java
+    │           │   │   └── utils
+    │           │   │       ├── Area.java
+    │           │   │       ├── Elements.java
+    │           │   │       ├── GuiUtils.java
+    │           │   │       ├── Icon.java
+    │           │   │       ├── IconRegistry.java
+    │           │   │       ├── Icons.java
+    │           │   │       ├── InterpolationRenderer.java
+    │           │   │       ├── Keybind.java
+    │           │   │       ├── KeybindConfig.java
+    │           │   │       ├── KeybindManager.java
+    │           │   │       ├── Label.java
+    │           │   │       ├── ModKeybinds.java
+    │           │   │       ├── Scale.java
+    │           │   │       ├── ScrollArea.java
+    │           │   │       ├── ScrollDirection.java
+    │           │   │       ├── TabCompleter.java
+    │           │   │       ├── ValueColors.java
+    │           │   │       ├── keys
+    │           │   │       │   ├── CompoundKey.java
+    │           │   │       │   ├── IKey.java
+    │           │   │       │   ├── KeyParser.java
+    │           │   │       │   ├── LangKey.java
+    │           │   │       │   └── StringKey.java
+    │           │   │       └── resizers
+    │           │   │           ├── AutomaticResizer.java
+    │           │   │           ├── BaseResizer.java
+    │           │   │           ├── ChildResizer.java
+    │           │   │           ├── DecoratedResizer.java
+    │           │   │           ├── Flex.java
+    │           │   │           ├── IParentResizer.java
+    │           │   │           ├── IResizer.java
+    │           │   │           ├── Margin.java
+    │           │   │           ├── constraint
+    │           │   │           │   └── BoundsResizer.java
+    │           │   │           └── layout
+    │           │   │               ├── ColumnResizer.java
+    │           │   │               ├── GridResizer.java
+    │           │   │               └── RowResizer.java
+    │           │   └── render
+    │           │       ├── RenderLightmap.java
+    │           │       └── VertexBuilder.java
+    │           ├── commands
+    │           │   ├── CommandCheats.java
+    │           │   ├── CommandMcLib.java
+    │           │   ├── McCommandBase.java
+    │           │   ├── SubCommandBase.java
+    │           │   ├── config
+    │           │   │   ├── SubCommandConfig.java
+    │           │   │   ├── SubCommandConfigBase.java
+    │           │   │   ├── SubCommandConfigPrint.java
+    │           │   │   └── SubCommandConfigSet.java
+    │           │   └── utils
+    │           │       └── L10n.java
+    │           ├── config
+    │           │   ├── Config.java
+    │           │   ├── ConfigBuilder.java
+    │           │   ├── ConfigHandler.java
+    │           │   ├── ConfigManager.java
+    │           │   ├── ConfigThread.java
+    │           │   ├── gui
+    │           │   │   └── GuiConfigPanel.java
+    │           │   ├── json
+    │           │   │   └── ConfigParser.java
+    │           │   └── values
+    │           │       ├── GenericBaseValue.java
+    │           │       ├── GenericNumberValue.java
+    │           │       ├── GenericValue.java
+    │           │       ├── IConfigGuiProvider.java
+    │           │       ├── IServerValue.java
+    │           │       ├── Value.java
+    │           │       ├── ValueBoolean.java
+    │           │       ├── ValueColor.java
+    │           │       ├── ValueDouble.java
+    │           │       ├── ValueFloat.java
+    │           │       ├── ValueGUI.java
+    │           │       ├── ValueInt.java
+    │           │       ├── ValueItemSlots.java
+    │           │       ├── ValueLong.java
+    │           │       ├── ValueRL.java
+    │           │       ├── ValueRotationOrder.java
+    │           │       └── ValueString.java
+    │           ├── core
+    │           │   ├── McLibCM.java
+    │           │   ├── McLibCMClassTransformer.java
+    │           │   ├── McLibCMInfo.java
+    │           │   └── transformers
+    │           │       ├── CPacketCustomPayloadTransformer.java
+    │           │       ├── EntityRendererTransformer.java
+    │           │       ├── PacketBufferTransformer.java
+    │           │       └── SimpleReloadableResourceManagerTransformer.java
+    │           ├── events
+    │           │   ├── EventHandler.java
+    │           │   ├── MultiskinProcessedEvent.java
+    │           │   ├── RegisterConfigEvent.java
+    │           │   ├── RegisterDashboardPanels.java
+    │           │   ├── RegisterPermissionsEvent.java
+    │           │   ├── RemoveDashboardPanels.java
+    │           │   ├── RenderOverlayEvent.java
+    │           │   └── RenderingHandler.java
+    │           ├── math
+    │           │   ├── Constant.java
+    │           │   ├── Group.java
+    │           │   ├── IValue.java
+    │           │   ├── MathBuilder.java
+    │           │   ├── Negate.java
+    │           │   ├── Negative.java
+    │           │   ├── Operation.java
+    │           │   ├── Operator.java
+    │           │   ├── Ternary.java
+    │           │   ├── Variable.java
+    │           │   ├── Wrapper.java
+    │           │   ├── functions
+    │           │   │   ├── Function.java
+    │           │   │   ├── NNFunction.java
+    │           │   │   ├── NSFunction.java
+    │           │   │   ├── SNFunction.java
+    │           │   │   ├── SSFunction.java
+    │           │   │   ├── classic
+    │           │   │   │   ├── Abs.java
+    │           │   │   │   ├── Exp.java
+    │           │   │   │   ├── Ln.java
+    │           │   │   │   ├── Mod.java
+    │           │   │   │   ├── Pow.java
+    │           │   │   │   └── Sqrt.java
+    │           │   │   ├── limit
+    │           │   │   │   ├── Clamp.java
+    │           │   │   │   ├── Max.java
+    │           │   │   │   └── Min.java
+    │           │   │   ├── rounding
+    │           │   │   │   ├── Ceil.java
+    │           │   │   │   ├── Floor.java
+    │           │   │   │   ├── Round.java
+    │           │   │   │   └── Trunc.java
+    │           │   │   ├── string
+    │           │   │   │   ├── StringContains.java
+    │           │   │   │   ├── StringEndsWith.java
+    │           │   │   │   └── StringStartsWith.java
+    │           │   │   ├── trig
+    │           │   │   │   ├── Acos.java
+    │           │   │   │   ├── Asin.java
+    │           │   │   │   ├── Atan.java
+    │           │   │   │   ├── Atan2.java
+    │           │   │   │   ├── Cos.java
+    │           │   │   │   └── Sin.java
+    │           │   │   └── utility
+    │           │   │       ├── DieRoll.java
+    │           │   │       ├── DieRollInteger.java
+    │           │   │       ├── HermiteBlend.java
+    │           │   │       ├── Lerp.java
+    │           │   │       ├── LerpRotate.java
+    │           │   │       ├── Random.java
+    │           │   │       └── RandomInteger.java
+    │           │   └── molang
+    │           │       ├── MolangException.java
+    │           │       ├── MolangParser.java
+    │           │       ├── expressions
+    │           │       │   ├── MolangAssignment.java
+    │           │       │   ├── MolangExpression.java
+    │           │       │   ├── MolangMultiStatement.java
+    │           │       │   └── MolangValue.java
+    │           │       └── functions
+    │           │           ├── AcosDegrees.java
+    │           │           ├── AsinDegrees.java
+    │           │           ├── Atan2Degrees.java
+    │           │           ├── AtanDegrees.java
+    │           │           ├── CosDegrees.java
+    │           │           └── SinDegrees.java
+    │           ├── network
+    │           │   ├── AbstractDispatcher.java
+    │           │   ├── AbstractMessageHandler.java
+    │           │   ├── ClientMessageHandler.java
+    │           │   ├── IByteBufSerializable.java
+    │           │   ├── INBTSerializable.java
+    │           │   ├── ServerMessageHandler.java
+    │           │   └── mclib
+    │           │       ├── Dispatcher.java
+    │           │       ├── client
+    │           │       │   ├── AbstractClientHandlerAnswer.java
+    │           │       │   ├── ClientHandlerAnswer.java
+    │           │       │   ├── ClientHandlerBoolean.java
+    │           │       │   ├── ClientHandlerConfig.java
+    │           │       │   └── ClientHandlerConfirm.java
+    │           │       ├── common
+    │           │       │   ├── IAnswerRequest.java
+    │           │       │   ├── PacketAnswer.java
+    │           │       │   ├── PacketBoolean.java
+    │           │       │   ├── PacketConfig.java
+    │           │       │   ├── PacketConfirm.java
+    │           │       │   ├── PacketDropItem.java
+    │           │       │   ├── PacketRequestConfigs.java
+    │           │       │   └── PacketRequestPermission.java
+    │           │       └── server
+    │           │           ├── ServerHandlerConfig.java
+    │           │           ├── ServerHandlerConfirm.java
+    │           │           ├── ServerHandlerDropItem.java
+    │           │           ├── ServerHandlerPermissionRequest.java
+    │           │           └── ServerHandlerRequestConfigs.java
+    │           ├── permissions
+    │           │   ├── McLibPermissions.java
+    │           │   ├── PermissionCategory.java
+    │           │   ├── PermissionFactory.java
+    │           │   └── PermissionUtils.java
+    │           └── utils
+    │               ├── BetterLightsHelper.java
+    │               ├── ByteBufUtils.java
+    │               ├── Color.java
+    │               ├── ColorUtils.java
+    │               ├── Consumers.java
+    │               ├── Direction.java
+    │               ├── DummyEntity.java
+    │               ├── EntityUtils.java
+    │               ├── ForgeUtils.java
+    │               ├── ICopy.java
+    │               ├── IInterpolation.java
+    │               ├── ITransformationObject.java
+    │               ├── Interpolation.java
+    │               ├── Interpolations.java
+    │               ├── JsonUtils.java
+    │               ├── Keys.java
+    │               ├── LatencyTimer.java
+    │               ├── MathUtils.java
+    │               ├── MatrixUtils.java
+    │               ├── ModHelper.java
+    │               ├── NBTUtils.java
+    │               ├── OpHelper.java
+    │               ├── OptifineHelper.java
+    │               ├── Patterns.java
+    │               ├── PayloadASM.java
+    │               ├── RayTracing.java
+    │               ├── ReflectionUtils.java
+    │               ├── RenderingUtils.java
+    │               ├── Rewriter.java
+    │               ├── TextUtils.java
+    │               ├── Timer.java
+    │               ├── ValueSerializer.java
+    │               ├── binary
+    │               │   ├── BinaryChunk.java
+    │               │   └── BinaryReader.java
+    │               ├── coremod
+    │               │   ├── ClassMethodTransformer.java
+    │               │   ├── ClassTransformer.java
+    │               │   └── CoreClassTransformer.java
+    │               ├── files
+    │               │   ├── EntrySorter.java
+    │               │   ├── FileTree.java
+    │               │   ├── GlobalTree.java
+    │               │   └── entries
+    │               │       ├── AbstractEntry.java
+    │               │       ├── FileEntry.java
+    │               │       ├── FolderEntry.java
+    │               │       └── FolderImageEntry.java
+    │               ├── keyframes
+    │               │   ├── Keyframe.java
+    │               │   ├── KeyframeChannel.java
+    │               │   ├── KeyframeEasing.java
+    │               │   ├── KeyframeInterpolation.java
+    │               │   └── KeyframeInterpolations.java
+    │               ├── resources
+    │               │   ├── FilteredResourceLocation.java
+    │               │   ├── IResourceTransformer.java
+    │               │   ├── IWritableLocation.java
+    │               │   ├── MultiResourceLocation.java
+    │               │   ├── MultiResourceLocationManager.java
+    │               │   ├── MultiskinThread.java
+    │               │   ├── PixelAccessor.java
+    │               │   ├── Pixels.java
+    │               │   ├── RLUtils.java
+    │               │   ├── TextureLocation.java
+    │               │   └── TextureProcessor.java
+    │               ├── shaders
+    │               │   └── Shader.java
+    │               ├── undo
+    │               │   ├── CompoundUndo.java
+    │               │   ├── IUndo.java
+    │               │   ├── IUndoListener.java
+    │               │   └── UndoManager.java
+    │               └── wav
+    │                   ├── Wave.java
+    │                   ├── WavePlayer.java
+    │                   ├── WaveReader.java
+    │                   └── Waveform.java
+    └── resources
+        ├── assets
+        │   └── mclib
+        │       ├── lang
+        │       │   ├── en_US.lang
+        │       │   ├── es_ES.lang
+        │       │   ├── fr_FR.lang
+        │       │   ├── pt_BR.lang
+        │       │   ├── ru_RU.lang
+        │       │   ├── ua_uk.lang
+        │       │   ├── zh_CN.lang
+        │       │   └── zh_TW.lang
+        │       ├── shaders
+        │       │   ├── preview.frag
+        │       │   └── preview.vert
+        │       └── textures
+        │           ├── gui
+        │           │   └── icons.png
+        │           └── pixel.png
+        └── mcmod.info

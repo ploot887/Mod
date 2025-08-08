@@ -1,0 +1,179 @@
+src
+└── main
+    ├── java
+    │   └── mchorse
+    │       └── emoticons
+    │           ├── ClientProxy.java
+    │           ├── CommonProxy.java
+    │           ├── Emoticons.java
+    │           ├── api
+    │           │   ├── animation
+    │           │   │   └── model
+    │           │   │       ├── AnimationSimple.java
+    │           │   │       ├── AnimationSimpleMesh.java
+    │           │   │       └── AnimatorEmoticonsController.java
+    │           │   └── metamorph
+    │           │       ├── EmoticonsFactory.java
+    │           │       ├── EmoticonsMorph.java
+    │           │       ├── EmoticonsSection.java
+    │           │       ├── MetamorphHandler.java
+    │           │       ├── emote
+    │           │       │   ├── MorphEmote.java
+    │           │       │   └── MorphPart.java
+    │           │       └── gui
+    │           │           ├── GuiEmoticonsMorph.java
+    │           │           └── GuiEmoticonsMorphPanel.java
+    │           ├── blockbuster
+    │           │   ├── BBIntegration.java
+    │           │   ├── EmoteAction.java
+    │           │   └── GuiEmoteActionPanel.java
+    │           ├── capabilities
+    │           │   ├── CapabilitiesHandler.java
+    │           │   └── cosmetic
+    │           │       ├── Cosmetic.java
+    │           │       ├── CosmeticMode.java
+    │           │       ├── CosmeticProvider.java
+    │           │       ├── CosmeticStorage.java
+    │           │       └── ICosmetic.java
+    │           ├── client
+    │           │   ├── EmoteKeys.java
+    │           │   ├── EntityModelHandler.java
+    │           │   ├── KeyboardHandler.java
+    │           │   ├── NetworkHandler.java
+    │           │   ├── gui
+    │           │   │   ├── GuiEmotes.java
+    │           │   │   ├── GuiEmotesList.java
+    │           │   │   └── GuiEmoticonsModelRenderer.java
+    │           │   └── particles
+    │           │       ├── PopcornParticle.java
+    │           │       └── SaltParticle.java
+    │           ├── commands
+    │           │   └── CommandEmote.java
+    │           ├── common
+    │           │   ├── EmoteAPI.java
+    │           │   └── emotes
+    │           │       ├── CryingEmote.java
+    │           │       ├── DisgustedEmote.java
+    │           │       ├── Emote.java
+    │           │       ├── Emotes.java
+    │           │       ├── PopcornEmote.java
+    │           │       ├── PureSaltEmote.java
+    │           │       ├── RockPaperScissorsEmote.java
+    │           │       ├── SneezeEmote.java
+    │           │       └── StarPowerEmote.java
+    │           ├── network
+    │           │   ├── Dispatcher.java
+    │           │   ├── client
+    │           │   │   ├── ClientHandlerEmote.java
+    │           │   │   └── ClientHandlerGameMode.java
+    │           │   ├── common
+    │           │   │   ├── PacketEmote.java
+    │           │   │   └── PacketGameMode.java
+    │           │   └── server
+    │           │       └── ServerHandlerEmote.java
+    │           ├── skin_n_bones
+    │           │   └── api
+    │           │       ├── animation
+    │           │       │   ├── Animation.java
+    │           │       │   ├── AnimationManager.java
+    │           │       │   ├── AnimationMesh.java
+    │           │       │   ├── AnimationMeshConfig.java
+    │           │       │   ├── AnimationPack.java
+    │           │       │   ├── json
+    │           │       │   │   ├── ActionConfigAdapter.java
+    │           │       │   │   ├── AnimationMeshConfigAdapter.java
+    │           │       │   │   ├── AnimatorActionsConfigAdapter.java
+    │           │       │   │   ├── AnimatorConfigAdapter.java
+    │           │       │   │   └── AnimatorHeldItemConfigAdapter.java
+    │           │       │   └── model
+    │           │       │       ├── ActionConfig.java
+    │           │       │       ├── ActionPlayback.java
+    │           │       │       ├── Animator.java
+    │           │       │       ├── AnimatorActionsConfig.java
+    │           │       │       ├── AnimatorConfig.java
+    │           │       │       ├── AnimatorController.java
+    │           │       │       ├── AnimatorHeldItemConfig.java
+    │           │       │       ├── AnimatorPoseTransform.java
+    │           │       │       ├── IAnimator.java
+    │           │       │       └── IAnimatorFactory.java
+    │           │       ├── bobj
+    │           │       │   ├── BOBJAction.java
+    │           │       │   ├── BOBJArmature.java
+    │           │       │   ├── BOBJBone.java
+    │           │       │   ├── BOBJBoneModifier.java
+    │           │       │   ├── BOBJChannel.java
+    │           │       │   ├── BOBJGroup.java
+    │           │       │   ├── BOBJKeyframe.java
+    │           │       │   └── BOBJLoader.java
+    │           │       └── metamorph
+    │           │           ├── AnimatedFactory.java
+    │           │           ├── AnimatedMorph.java
+    │           │           ├── AnimatedPose.java
+    │           │           ├── AnimatedSection.java
+    │           │           ├── AnimatorMorphController.java
+    │           │           ├── PoseAnimation.java
+    │           │           └── editor
+    │           │               ├── GuiActionsPanel.java
+    │           │               ├── GuiAnimatedBodyPartEditor.java
+    │           │               ├── GuiAnimatedModelRenderer.java
+    │           │               ├── GuiAnimatedMorph.java
+    │           │               ├── GuiAnimatedMorphPanel.java
+    │           │               ├── GuiMeshesPanel.java
+    │           │               └── IBonePicker.java
+    │           └── utils
+    │               ├── EntityUtils.java
+    │               ├── PlayerReviveUtils.java
+    │               ├── Time.java
+    │               └── ValueButtons.java
+    └── resources
+        ├── assets
+        │   └── emoticons
+        │       ├── lang
+        │       │   ├── en_US.lang
+        │       │   ├── es_ES.lang
+        │       │   ├── ru_RU.lang
+        │       │   ├── ua_UA.lang
+        │       │   ├── zh_CN.lang
+        │       │   └── zh_TW.lang
+        │       ├── models
+        │       │   └── entity
+        │       │       ├── actions.bobj
+        │       │       ├── default.bobj
+        │       │       ├── default.json
+        │       │       ├── default_3d.bobj
+        │       │       ├── default_simple.bobj
+        │       │       ├── default_simple.json
+        │       │       ├── default_simple_plus.bobj
+        │       │       ├── props.bobj
+        │       │       ├── props_simple.bobj
+        │       │       ├── ragdoll.bobj
+        │       │       ├── slim.bobj
+        │       │       ├── slim.json
+        │       │       ├── slim_3d.bobj
+        │       │       ├── slim_simple.bobj
+        │       │       ├── slim_simple.json
+        │       │       └── slim_simple_plus.bobj
+        │       ├── sounds
+        │       │   ├── best_mates.ogg
+        │       │   ├── boneless.ogg
+        │       │   ├── default.ogg
+        │       │   ├── disco_fever.ogg
+        │       │   ├── electro_shuffle.ogg
+        │       │   ├── floss.ogg
+        │       │   ├── fresh.ogg
+        │       │   ├── gangnam_style.ogg
+        │       │   ├── hype.ogg
+        │       │   ├── infinite_dab.ogg
+        │       │   ├── orange_justice.ogg
+        │       │   ├── skibidi.ogg
+        │       │   ├── squat_kick.ogg
+        │       │   ├── star_power.ogg
+        │       │   ├── take_the_l.ogg
+        │       │   └── tidy.ogg
+        │       ├── sounds.json
+        │       └── textures
+        │           ├── gui
+        │           │   └── icons.png
+        │           ├── particles.png
+        │           └── popcorn.png
+        └── mcmod.info

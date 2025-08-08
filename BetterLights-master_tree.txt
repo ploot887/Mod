@@ -1,0 +1,54 @@
+src
+└── main
+    ├── java
+    │   └── com
+    │       └── susjin
+    │           └── lampmod
+    │               ├── Lamp.java
+    │               ├── LightTab.java
+    │               ├── Reference.java
+    │               ├── blocks
+    │               │   ├── BlockGlowingBricks.java
+    │               │   ├── BlockLight.java
+    │               │   └── BlockLightProvider.java
+    │               ├── init
+    │               │   ├── ModBlocks.java
+    │               │   ├── ModCrafting.java
+    │               │   └── ModItems.java
+    │               ├── items
+    │               │   ├── Itemlampbot.java
+    │               │   └── Itemlamptop.java
+    │               ├── proxy
+    │               │   ├── ClientProxy.java
+    │               │   ├── CommonProxy.java
+    │               │   └── ServerProxy.java
+    │               └── tileentity
+    │                   └── TileEntityLight.java
+    └── resources
+        ├── assets
+        │   └── slp
+        │       ├── blockstates
+        │       │   ├── BlockGlowingBricks.json
+        │       │   ├── BlockLight.json
+        │       │   └── BlockLightProvider.json
+        │       ├── lang
+        │       │   └── en_US.lang
+        │       ├── models
+        │       │   ├── block
+        │       │   │   ├── glowingBricks.json
+        │       │   │   ├── light.json
+        │       │   │   └── lightprovider.json
+        │       │   └── item
+        │       │       ├── BlockGlowingBricks.json
+        │       │       ├── BlockLight.json
+        │       │       ├── BlockLightProvider.json
+        │       │       ├── Itemlampbot.json
+        │       │       └── Itemlamptop.json
+        │       └── textures
+        │           ├── blocks
+        │           │   ├── glass_gray.png
+        │           │   └── glowingBricks.png
+        │           └── items
+        │               ├── lampbot.png
+        │               └── lamptop.png
+        └── mcmod.info
