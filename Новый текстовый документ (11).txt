@@ -1,0 +1,595 @@
+Мета‑мод: Полный статический аудит и консолидация BetterLights, Blockbuster, Chameleon, Commander, Emoticons, ExtendedReach, McLib, Metamorph
+Версия артефактов: согласно деревьям/дампам в репозитории ploot887/Mod (см. перечень источников ниже)
+Аудитор: ИИ‑ассистент
+Дата: 2025‑08‑08
+
+СОДЕРЖАНИЕ
+1. Резюме архитектуры
+2. Диаграмма модулей и зависимостей (текстовая)
+3. Подробный функциональный обзор по подсистемам
+   3.1. Базовая библиотека и GUI‑фреймворк (McLib)
+   3.2. Морфинг и геймплей (Metamorph)
+   3.3. Анимации/модели и эмоции (Emoticons)
+   3.4. Кинематограф/записи/редакторы (Blockbuster)
+   3.5. Процедурная анимация и MoLang (Chameleon)
+   3.6. Расширенные команды (Commander)
+   3.7. Удлинённая дистанция взаимодействия (ExtendedReach, ASM)
+   3.8. Освещение/контент (BetterLights)
+4. Полный GUI‑спецификатор
+   4.1. Система GUI (McLib): принципы, лейаут, отрисовка
+   4.2. Каталог экранов/панелей по модулям (состав, элементы, события)
+   4.3. Глава: «GUI sequencer morph» (реконструкция)
+5. Пайплайн .bobj (BOBJ): от загрузки до использования
+6. Карты соответствий: классы ↔ ресурсы ↔ локализации ↔ GUI элементы
+7. Справочник команд, сетевых каналов и конфигов
+8. Приложение: таблицы классов/методов, точки входа, события, capability/регистрации
+9. Источники и покрытие
+
+Важное примечание по полноте: Документ покрывает все представленные пользователем артефакты (деревья и дампы). Для некоторых модулей (например, Blockbuster) дерево файлов в источнике обрезано («[...]»), поэтому детальный перечень классов построен по видимой части. Тем не менее, архитектура и интерфейсы реконструированы максимально полно в рамках предоставленных материалов.
+
+1) РЕЗЮМЕ АРХИТЕКТУРЫ
+
+Мета‑мод представляет собой связку из 8 модулей:
+- McLib (mchorse.mclib): базовая библиотека, GUI‑фреймворк, конфиги, ключевые утилиты, события, сеть, пермишены, keyframe‑виджеты.
+- Metamorph (mchorse.metamorph): система «морфинга» игрока в сущности с поддержкой способностей, редакторов морфов и оверлеев, собственный канал сети и капабилити.
+- Emoticons (mchorse.emoticons): воспроизведение анимаций/эмоций для моделей игрока; активно использует формат BOBJ (.bobj), skin_n_bones анимационную подсистему, интеграции с Metamorph/Blockbuster, GUI выбора эмоций.
+- Chameleon (mchorse.chameleon): проигрыватель процедурных действий с MoLang, загрузчик Бедрок‑подобных .geo/.animation.json, а также интеграция с Metamorph через фабрику морфов; имеет клиентский пак и дерево моделей.
+- Blockbuster (mchorse.blockbuster): большой мод для сцен/актеров/записей/таймлайна, модельных редакторов, поддержка OBJ/VOX и богатый набор GUI (в т.ч. таймлайн/записи, редактор моделей).
+- Commander (mchorse.commander): расширяет консольные команды (/forin, /forinc) с подстановками @{…} и «pipe» оператором «||», включая клиентскую декомпозицию.
+- ExtendedReach (mchorse.extendedreach): coremod с ASM‑патчами для расширения дистанции взаимодействия, синхронизируемый конфиг (reach).
+- BetterLights (com.susjin.lampmod): добавляет блоки/тайлэнтити/предметы освещения, рецепты и клиентский creative tab.
+
+Объединяющим каркасом служит McLib: общие события, GUI, конфиг‑модель, сеть, ASM‑утилиты. Metamorph/Emoticons/Chameleon/Blockbuster строятся поверх McLib. Emoticons и Chameleon интегрируются с Metamorph (морфы/действия). ExtendedReach влияет на базовое взаимодействие игрока через ASM. BetterLights добавляет игровой контент.
+
+2) ДИАГРАММА МОДУЛЕЙ И ЗАВИСИМОСТЕЙ (текстовая)
+
+Hard deps (по @Mod/dependencies и коду):
+- Emoticons → required-after:mclib, after:metamorph (Emoticons.java)
+- Chameleon → required-after:mclib, required-after:metamorph (Chameleon.java)
+- ExtendedReach → required-after:mclib (ExtendedReach.java)
+- Metamorph → зависит от McLib (использует McLib.EVENT_BUS, ConfigBuilder и др.)
+- Blockbuster → зависит от McLib и имеет собственные интеграции с Aperture; использует GUI McLib и API моделей; (по дереву: множество GUI и API)
+- Commander → required-after:mclib (Commander.java)
+- BetterLights → самостоятельный контент‑мод (Forge 1.10.2), без McLib
+
+Мягкие/интеграционные deps:
+- Emoticons ↔ Metamorph: MetamorphHandler (api/metamorph), согласование эмоций с морфами; GuiImmersiveMorphMenu в Blockbuster.
+- Emoticons ↔ Blockbuster: BBIntegration (blockbuster/BBIntegration.java)
+- Chameleon ↔ Metamorph: ChameleonFactory добавляется в MorphManager.INSTANCE.factories.
+
+Каналы/сеть:
+- Emoticons.channel ("Emoticons") FMLEventChannel
+- Metamorph.channel ("Metamorph") FMLEventChannel
+- McLib.network.mclib.Dispatcher (регистрирует пакеты McLib)
+- Blockbuster apertue/network (клиент/сервер handlers) — свой стек, показан в дереве
+- ExtendedReach не использует каналы, но ASM‑патчит Vanilla
+
+ASM/Coremod:
+- ExtendedReachCMClassTransformer: трансформирует PlayerControllerMP, PlayerInteractionManager, EntityRenderer, NetHandlerPlayServer, Item (см. §3.7).
+- McLib core: core/transformers (CPacketCustomPayloadTransformer, SimpleReloadableResourceManagerTransformer и др.) — инфраструктурные патчи (payload, ресурсы).
+
+Capabilities:
+- Metamorph: IMorphing, IModelRenderer
+- Emoticons: ICosmetic
+
+Сущности:
+- Metamorph: EntityMorph (регистрация с ResourceLocation "metamorph:morph").
+
+3) ПОДРОБНЫЙ ФУНКЦИОНАЛЬНЫЙ ОБЗОР ПО ПОДСИСТЕМАМ
+
+3.1) McLib (mchorse.mclib)
+Назначение:
+- Общая библиотека/каркас: конфиги, пермишены, сеть, события, утилиты, GUI‑фреймворк, keyframe‑виджеты, ресурсы (иконки, шейдеры).
+
+Главные классы/жизненный цикл:
+- McLib.java (@Mod EventBusSubscriber)
+  - MOD_ID "mclib", VERSION "%VERSION%", updateJSON (ветка 1.12)
+  - proxy: ClientProxy/CommonProxy
+  - EVENT_BUS (собственный шина событий модов McHorse)
+  - @SubscribeEvent onConfigRegister(RegisterConfigEvent): регистрирует множество конфигов (appearance, tutorials, background, scrollbars, multiskin, vanilla/maxPacketSize (PayloadASM.MIN_SIZE))
+  - @SubscribeEvent onPermissionRegister(RegisterPermissionsEvent): PermissionFactory, категории
+  - @EventHandler preInit/init/serverInit: регистрация, команды CommandMcLib/CommandCheats
+  - NetworkCheckHandler: всегда true
+- CommonProxy: держит ConfigManager, регистрирует Dispatcher (mclib.network.mclib), EventBus: ConfigHandler/EventHandler, Icons.register()
+- ClientProxy: регистрирует KeyboardHandler, InputRenderer, RenderingHandler; KeybindConfig; включение stencil в FBO; reload listener (обновление LangKey, очистка MultiResourceLocation текстур через ReflectionUtils); добавляет KeybindConfig в configs.modules.
+
+GUI‑фреймворк (пакеты mclib.client.gui.*):
+- framework: GuiBase, GuiElement(s), IGuiElement/IFocusedGuiElement, GuiScrollElement, GuiModelRenderer, GuiPanelBase и др.
+- buttons: GuiButtonElement, GuiToggleElement, GuiCirculateElement, GuiIconElement, GuiSlotElement
+- input: GuiBaseTextElement, GuiTextElement, GuiTrackpadElement, GuiColorElement, GuiTexturePicker, GuiKeybindElement, GuiTransformations; под‑пакеты color (GuiColorPalette/Picker), multiskin (GuiMultiSkinEditor)
+- list: разнообразные списки/поиски элементов (GuiListElement, GuiSearchListElement, Label/ResourceLocation/String варианты)
+- modals: GuiModal/Confirm/List/Message/PopUp/Prompt
+- utils: GuiCanvas/Editor, GuiContext, GuiDraw, GuiDrawable, GuiLabel, GuiInventoryElement, ViewportStack, IconContainer, ITextColoring; IViewport/IViewportStack
+- tooltips: GuiTooltip, ITooltip, LabelTooltip, InterpolationTooltip; styles: Dark/Light/TooltipStyle
+- keyframes: GuiDopeSheet, GuiGraphView, GuiKeyframeElement, GuiKeyframeInterpolationsList, GuiKeyframesEditor, GuiSheet; IAxisConverter, Selection
+
+Рендер/утилиты:
+- client.Draw (оси/точки/куб), RenderLightmap, VertexBuilder
+- utils: богатейший набор: Color/ColorUtils, Interpolation, Interpolations, InterpolationRenderer, MathUtils/MatrixUtils, JsonUtils, ReflectionUtils, RLUtils, RenderingUtils, RayTracing, Timer, LatencyTimer, ValueSerializer, Binary IO, keyframes.*, files tree (FileTree/GlobalTree/entries), resources (TextureProcessor, MultiResourceLocation, Pixels), shaders/Shader, undo менеджер, wav рендеры/плееры, coremod утилиты.
+
+Сеть:
+- network: абстракции AbstractDispatcher, AbstractMessageHandler, ClientMessageHandler, ServerMessageHandler, IByteBufSerializable, INBTSerializable
+- network.mclib: Dispatcher и набор Packet* (Answer, Boolean, Config, Confirm, DropItem, RequestConfigs/Permission), клиентские/серверные handlers
+
+Конфиги/пермишены:
+- config: Config, ConfigBuilder/Handler/Manager/Thread, values (ValueBoolean/Int/Float/Double/Long/Color/RL/String/RotationOrder, GUI интеграция)
+- permissions: PermissionFactory, PermissionCategory, PermissionUtils; событие RegisterPermissionsEvent
+
+Coremod/ASM:
+- core: McLibCM, McLibCMInfo, McLibCMClassTransformer; transformers: CPacketCustomPayloadTransformer, EntityRendererTransformer, PacketBufferTransformer, SimpleReloadableResourceManagerTransformer (детали в данном дампе не раскрыты, но назначение — расширение payload и обёртка ресурсов)
+
+Ключевое: McLib — это фундаментальная библиотека и GUI‑фреймворк, от которой напрямую зависят Metamorph/Emoticons/Chameleon/ExtendedReach/Blockbuster. Также McLib поставляет универсальные виджеты для кейфреймов (DopeSheet/GraphView), используемые редакторами в Blockbuster.
+
+3.2) Metamorph (mchorse.metamorph)
+Назначение:
+- Механика морфинга (смена формы игрока на сущности), способности, редакторы, GUI в креативе/выживании, замена рендеров Player для отображения рук, синхронизация состояния, капабилити.
+
+Главные классы/жизненный цикл:
+- Metamorph.java (@Mod)
+  - Канал FMLEventChannel "Metamorph"
+  - Конфиги (RegisterConfigEvent): множество ValueBoolean/Int: opEntitySelector (syncable), preventGhosts/killAcquire/acquireImmediately, keepMorphs, disablePov/Health/MorphAnimation/MorphDisguise/FirstPersonHand (client), morphInTightSpaces, showMorphIdleSounds, pauseGUIInSP (client), renderBodyPartAxis (client), maxRecentMorphs (client), allowMorphingIntoCategoryMorphs, loadEntityMorphs (client)
+  - preLoad: McLib.EVENT_BUS.register(this), proxy.preLoad
+  - load/postLoad/serverStarting: регистрация команд (CommandMorph/AcquireMorph/Metamorph), подгрузка активных списков/настроек, сетевой канал.
+- CommonProxy:
+  - Регистрация Dispatcher (network), подключение фабрики MetamorphFactory в MorphManager.INSTANCE.factories
+  - Файлы конфигурации в <config>/metamorph: morphs.json, blacklist.json, remap.json, selectors.json, list.json
+  - Регистрация EntityMorph в EntityRegistry: id 0, "metamorph:morph"
+  - Регистрация событий: MorphHandler, SoundHandler, CapabilityHandler, RegisterHandler
+  - Регистрация капабилити: IMorphing (MorphingStorage, Morphing), IModelRenderer (ModelRendererStorage, ModelRenderer)
+  - Генерация дефолтных файлов при отсутствии
+- ClientProxy (SideOnly CLIENT):
+  - RenderingRegistry.registerEntityRenderingHandler(EntityMorph, RenderMorph.MorphFactory)
+  - Регистрация event handlers: RenderingHandler (HUD overlay GuiOverlay/GuiHud), KeyboardHandler, EntityModelHandler
+  - Загрузка селекторов моделей (models.loadSelectors) и генерация JSON при отсутствии
+  - postLoad: замена RenderPlayer на RenderSubPlayer через рефлексию RenderManager.skinMap (skin map)
+  - canEditSelectors: OP или opEntitySelector
+
+GUI/клиент:
+- client.gui: GuiMorphs (основной экран), creative.* (GuiCreativeMorphs, GuiCreativeMorphsList/Menu/Screen, GuiMorphRenderer, GuiMorphSection, GuiNestedEdit, GuiQuickEditor, GuiSelectorEditor, GuiSelectorsScreen, GuiUserSection), editor.* (GuiAbstractMorph, GuiAnimation, GuiMorphPanel, GuiSettingsPanel), overlays (GuiHud, GuiOverlay), survival (GuiSurvivalMorphs/Screen)
+- client.render.RenderMorph: рендер морфов
+- client.KeyboardHandler/NetworkHandler/RenderingHandler
+- capabilities.render: EntitySelector/Adapter/IModelRenderer/ModelProvider/Renderer/Storage
+- api: Morph/MorphUtils/MorphManager/MorphHandler/RegisterHandler/MorphSettings/IMorphFactory/MorphAPI и т.д.; morphs: AbstractMorph/EntityMorph/utils (Animation, Hitbox, IAnimationProvider, IMorphGenerator, ISyncableMorph)
+
+Сеть:
+- network.Dispatcher, client handlers и множество Packet* (creative, survival, settings, blacklist) — синхронизация состояния морфинга, индексов, избранного/удаления, состояния игрока
+
+Функционал:
+- Морфинг игрока, обработка поз (EntityUtils.getPose), сравнение NBT (stripEntityNBT/compareData), ray trace/target entity, слоты экипировки, пересчет размера хитбокса и проверка «помещается ли» (canPlayerMorphFit)
+
+3.3) Emoticons (mchorse.emoticons)
+Назначение:
+- Загрузка/воспроизведение анимаций эмоций (эмотов) для моделей игрока. Формат BOBJ (.bobj) — основной для анимаций, с поддержкой пользовательских расширений (config/emotes). Интеграция с Metamorph/Blockbuster. GUI для выбора/воспроизведения. Сеть для синхронизации.
+
+Главные классы/жизненный цикл:
+- Emoticons.java (@Mod)
+  - Канал "Emoticons" (FMLEventChannel)
+  - Конфиги: ValueButtons (клиентские кнопки), disableSoundEvents, animations: disableAnimations (syncable), modelType (режимы: default/simple/extruded/simple_plus, client), player_preview: mode/scale/x/y (client)
+  - preInit: channel, McLib.EVENT_BUS.register(this), proxy.preInit
+  - init: proxy.init
+  - serverStart: CommonProxy.registerEmotes() — загрузка серверных эмоций из <config>/emoticons/emotes/*.json
+- CommonProxy:
+  - configFolder = <config>/emoticons
+  - Dispatcher.register()
+  - Интеграции: BBIntegration/MorphemorphHandler.register() — при наличии
+  - init: Emotes.register(); Capability ICosmetic (CosmeticStorage/Cosmetic), событие CapabilitiesHandler
+  - registerEmotes(file, callback): парсинг JSON пользовательских эмоций, регистрации в Emotes по длительности из callback
+- ClientProxy (SideOnly CLIENT):
+  - EmoteKeys (горячие клавиши) загрузка/сохранение из <config>/keys.json
+  - Регистрация клиентских событий: KeyboardHandler, EntityModelHandler; клиентская команда /emote
+  - Загрузка встроенных моделей/анимаций:
+    - BOBJLoader.readData для actions.bobj (действия), ragdoll.bobj и множества модельных .bobj (default/slim/_3d/_simple/_simple_plus, props/_simple)
+    - reloadActions(): объединяет actionMap из actions + ragdoll, подключает пользовательские действия (.bobj из <config>/emotes и .json для длительностей)
+    - Присвоение actionMap ко всем вариантам моделей, merge проп‑моделей и ragdoll в скелет, выравнивание порядка костей
+    - Инициализация Animation объектов (Animation/AnimationSimple), регистрация в AnimationManager с приоритетом 1 и configFolder
+    - Загрузка AnimatorConfig для default/slim/default_simple/slim_simple из ресурсов .json
+  - Сетевая регистрация NetworkHandler в Emoticons.channel
+
+Скин‑н‑бонз (skin_n_bones) API:
+- api/animation/model: AnimationSimple/AnimationSimpleMesh/AnimatorEmoticonsController
+- skin_n_bones/api: Animation/AnimationManager (+gson/configs), модель анимаций, JSON адаптеры и контроллеры
+- api/metamorph: EmoticonsFactory, EmoticonsMorph, EmoticonsSection, MetamorphHandler (интеграция), MorphEmote/MorphPart; GUI редактор морфа эмоций
+
+Сеть:
+- network.Dispatcher с PacketEmote/GameMode; client/server handlers (ClientHandlerEmote/GameMode, ServerHandlerEmote)
+
+GUI:
+- client/gui: GuiEmotes (основной выбор эмоций), GuiEmotesList, GuiEmoticonsModelRenderer (просмотр); горячие клавиши — EmoteKeys; overlay части отсутствуют (в отличие от Metamorph), но возможно визуальная индикация.
+- blockbuster/BBIntegration: интеграция GUI с Blockbuster (эмоты как действия)
+- utils.ValueButtons — клиентская панель кнопок в конфиге
+
+Ресурсы:
+- assets/emoticons/models/entity/*.bobj, default*.json/slim*.json конфиги, actions.bobj/props.bobj/ragdoll.bobj, звуки *.ogg + sounds.json, текстуры particles.png/popcorn.png/gui/icons.png, локализации (en_US, es_ES, ru_RU, ua_UA, zh_CN, zh_TW)
+
+3.4) Blockbuster (mchorse.blockbuster)
+Назначение:
+- Сцены, актеры, модельные редакторы, редактор записей/таймлайна («sequencer» действий), GUI‑панели для управления контентом, поддержка форматов моделей OBJ/VOX, интеграция с Aperture (камера).
+
+Главные элементы (по дереву):
+- Blockbuster.java + Proxies
+- API моделей (api.*): Model, ModelLimb, ModelPack, ModelTransform, json adapters, loaders (JSON/OBJ/VOX) + ленивые загрузчики, resource entries
+- Клиент: ActorsPack, KeyboardHandler, RenderingHandler, SkinHandler
+- GUI:
+  - dashboard: GuiBlockbusterPanel/Panels, GuiFirstTime
+  - model_block: GuiModelBlockList/Panel
+  - model_editor: GuiModelEditorPanel + tabs (GuiModelEditorTab, GuiModelLimbs, GuiModelList, GuiModelOptions, GuiModelPoses), utils (GuiBBModelRenderer, GuiPoseTransformations, GuiTextureCanvas, GuiThreeElement, GuiTwoElement)
+  - recording_editor: GuiRecordList, GuiRecordTimeline, GuiRecordingEditorPanel, actions (GuiActionPanel и 15+ специализированных панелей: Block/Break/BreakAnimation/Chat/Command/Damage/Drop/Equip/HotbarChange/InteractEntity/ItemUse/ItemUseBlock/Morph/Mounting/PlaceBlock/ShootArrow)
+  - scene: GuiReplaySelector, GuiSceneManager, GuiScenePanel
+  - snowstorm: полноценный редактор частиц (разделы Appearance/Collision/Lighting/Expiration/General/Initialization/Lifetime/Mode/Motion/ParticleMorph/Rate/Shape/Space), рендерер и секции
+  - utils: GuiGradientEditor
+  - «Immersive» GUI: GuiImmersiveEditor, GuiImmersiveMorphMenu — близко к морф‑секвенсору
+- Aperture интеграция: camera/modifiers/TrackerModifier (+ GUI панель)
+- Сеть aperture: набор Packet* (SceneLength/RequestLength/Profiles), client/server handlers
+
+Модели:
+- Форматы: JSON/OBJ/VOX; MeshesOBJ/VOX; VoxReader/VoxDocument; редакторы поз/текстур; связь с GuiBBModelRenderer
+- В отличие от Emoticons, Blockbuster не использует .bobj напрямую (используется собственная система моделей); однако есть интеграция с Emoticons (эмоты как действия).
+
+3.5) Chameleon (mchorse.chameleon)
+Назначение:
+- Работа с Bedrock‑подобными моделями (.geo.json и .animation.json), проигрывание «действий» (ActionConfig/ActionsConfig) на основе MoLang и ChameleonAnimator. Интеграция с Metamorph в виде морфа ChameleonMorph. Клиентский пакет моделей и древо (ChameleonPack/ChameleonTree) в <config>/chameleon/models.
+
+Главные классы/жизненный цикл:
+- Chameleon.java (@Mod), depends on McLib и Metamorph
+  - preInit: McLib.EVENT_BUS.register(this), proxy.preInit(event), RegisterConfigEvent → ValueButtons("chameleon.general.buttons")
+- CommonProxy:
+  - configFile = <config>/chameleon
+  - MorphManager.INSTANCE.factories.add(new ChameleonFactory())
+- ClientProxy (SideOnly CLIENT):
+  - Статически создаёт MolangParser (MolangHelper.registerVars + дополнительные переменные query.*)
+  - modelsFile = <config>/chameleon/models
+  - reloadModels(): рекурсивное сканирование директорий (кроме skins), загрузка .geo.json и *.animation.json (включая ./animations/), построение ChameleonModel с Animations, трекинг lastUpdate, удаление отсутствующих
+  - pack = new ChameleonPack(modelsFile); ReflectionUtils.registerResourcePack(pack); GlobalTree.TREE.register(new ChameleonTree(modelsFile))
+  - getModelKeys(): ключи моделей для GUI/дерева
+- lib.*: ChameleonAnimator/Loader/Model, MolangHelper; data.model (Model, Bone, Cube, Transform, Vertex/UV), data.animation (Animation, Channel, Interpolation, Vector, Part, Animations), parsing (AnimationParser/ModelParser), renderers (Axis/Cube/Post/Renderer)
+- animation: ActionConfig (NBT), ActionPlayback (Fade IN/OUT, speed/clamp/reset/tick/looping, приоритеты), ActionsConfig (map name→ActionConfig)
+- metamorph: ChameleonFactory/ChameleonMorph/ChameleonSection; editor.*: GUI панели (MainPanel, ModelRenderer, Morph, CustomBodyPart, ActionsPanel; IBonePicker), render.* (Highlight/Stencil)
+- mclib: ChameleonTree, ValueButtons
+
+3.6) Commander (mchorse.commander)
+Назначение:
+- Расширяет команды через «для каждого» и подстановки выражений, а также «параллельные» команды через «||».
+
+Главные классы/жизненный цикл:
+- Commander.java (@Mod)
+  - preLoad: proxy.preLoad(event) — регистрирует CommandHandler на шине
+  - startServer: регистрирует серверную команду CommandForin, очищает переменные в CommandHandler
+- CommonProxy: preLoad → MinecraftForge.EVENT_BUS.register(CommandHandler.instance); executeClientCommand(...) — заглушка
+- ClientProxy (SideOnly CLIENT): preLoad → регистрирует команду CommandForinc в ClientCommandHandler; executeClientCommand(...) → ClientCommandHandler
+- Команды:
+  - CommandForin: /forin <start> <end> <command...>; permissionLevel=2; выполняет вложенную команду на диапазоне [start..end] с шагом ±1; три уровня вложенности (i/j/k) с переменными i_c/i_s и координатами x/y/z. Ошибка "commander.error.zero" при step==0.
+  - CommandForinc: клиентский аналог (использует ClientCommandHandler через proxy)
+- CommandHandler:
+  - MathBuilder + Rewriter (SubRewriter "@\\{([^\\}]+)\\}") для вычисления выражений и замены в командной строке; DecimalFormat "0.######"
+  - onCommand(CommandEvent):
+    - защищает от рекурсии executingClient
+    - если команда не /forin|/forinc:
+      - если содержит " || " → разбивает и исполняет каждую под‑команду в клиенте или на сервере
+      - если содержит "@{" → вычисляет/заменяет; для клиента вызывает клиентское исполнение, для сервера — подменяет параметры
+- Локализации: assets/commander/lang/en_US.lang — строки помощи/ошибки; типичная интеграция с McLib l10n.
+
+3.7) ExtendedReach (mchorse.extendedreach)
+Назначение:
+- Изменяет дистанцию взаимодействия (reach) игрока для блоков/предметов/кастов на стороне клиента/сервера через ASM‑патчи. Конфиг синхронизируемый.
+
+Главные классы/жизненный цикл:
+- ExtendedReach.java (@Mod)
+  - Конфиг: reach (ValueFloat, 0..1024, syncable)
+  - preInit: McLib.EVENT_BUS.register(this) для регистрации конфига
+- Coremod:
+  - ExtendedReachCM (IFMLLoadingPlugin): регистрирует ExtendedReachCMClassTransformer
+  - ExtendedReachCMClassTransformer (extends CoreClassTransformer):
+    - PlayerControllerMP → transform getBlockReachDistance() и extendedReach(): полностью заменены на статические вызовы BlockReach.getReach()/isExtended()
+    - PlayerInteractionManager → ItemTransformer.processBlockReach на методы с REACH_DISTANCE
+    - EntityRenderer.getMouseOver(float): удаляет LDC 6.0D (поиск через LDCInsnNode), затем удаляет следующий инстр., тем самым заменяет стандартный рейкаст дистанции; «успешно patched»
+    - NetHandlerPlayServer.processUseEntity(CPacketUseEntity): заменяет LDC 9.0D и 36.0D на BlockReach.getDoubleReachSq()
+    - Item: ItemTransformer.processBlockReach на rayTrace(World, EntityPlayer, boolean)
+  - ItemTransformer:
+    - Ищет шаблон вызовов REACH_DISTANCE (obf/deobf) и заменяет последовательность на INVOKESTATIC mchorse/extendedreach/utils/BlockReach.getDoubleReach()
+    - equals(AbstractInsnNode, …) для сравнения Field/MethodInsnNode
+  - PlayerControllerMPTransformer: см. выше (вставляет стат. вызовы и возвращает)
+  - PlayerInteractionManagerTransformer: делегирует processBlockReach
+  - EntityRendererTransformer: удаляет константный 6.0D (ray reach)
+  - NetHandlerPlayServerTransformer: заменяет две константы дистанции на динамическую квадрат дистанции
+- BlockReach.java: статические хелперы getReach()/getDoubleReach()/getDoubleReachSq()/isExtended()
+- Ресурсы: mcmod.info, assets/extendedreach/lang/en_US.lang — строки конфиг‑GUI
+
+Эффект: Все места Vanilla, где жёстко зашиты дистанции (6.0D/9.0D/36.0D/REACH_DISTANCE attr) — переподключены к значению из конфига ExtendedReach.reach. Это распространяется на выбор блока/энтити/айтем‑raytrace и проверку расширенного reach.
+
+3.8) BetterLights (com.susjin.lampmod)
+Назначение:
+- Игровой контент: источники света, светящиеся кирпичи, провайдер света (невидимый блок), предметы лампы, рецепты, tile entity.
+
+Главные классы/жизненный цикл:
+- Lamp.java (@Mod 1.10.2)
+  - preInit: регистрация ModItems/ModBlocks
+  - Init: proxy.init(), ModCrafting.register(), GameRegistry.registerTileEntity(TileEntityLight)
+  - postInit: лог
+- LightTab: вкладка «tabLight»
+- Blocks:
+  - BlockGlowingBricks: Material.ROCK, hardness 1, light 1.0F, в креатив вкладке
+  - BlockLight: стекло, неполный/непрозрачный куб, TRANSLUCENT, AABB столбика, ITileEntityProvider → TileEntityLight, коллизии ограничены боксом
+  - BlockLightProvider: «невидимый свет» (Material.AIR), невидим, без коллизии/дропа, заменяемый, FULLY OPAQUE=false, LIGHT 1.0F
+- init.ModBlocks: регистрация блоков/ItemBlock, клиентый renderer (ModelResourceLocation инвентори)
+- init.ModCrafting: рецепты (шэйпы, с использованием Blocks.STONEBRICK, GLOWSTONE, …)
+- init.ModItems + items.Itemlampbot/lamptop
+- proxy.* (Common/Client/Server), tileentity.TileEntityLight
+- Ресурсы: blockstates, models block/item, textures, lang, mcmod.info
+
+4) ПОЛНЫЙ GUI‑СПЕЦИФИКАТОР
+
+4.1) Система GUI (McLib): принципы, лейаут, отрисовка
+
+Базовая иерархия:
+- GuiBase — базовый экран, содержит корневые GuiElement'ы и стек вьюпортов; отвечает за цикл событий и отрисовку.
+- GuiElement — универсальный контейнер; имеет позиционирование, размер, список детей, методы draw/resize/mouse/key events; расширяется во множестве элементов.
+- GuiScrollElement — скроллируемый контейнер с внутренней областью (ScrollArea, ScrollDirection).
+- GuiPanelBase — панель с заголовками/рамками/логикой страниц.
+- GuiModelRenderer — виджет 3D просмотра (используется в модельных редакторах).
+
+Позиционирование и лейаут:
+- utils.resizers.*: BaseResizer, AutomaticResizer, DecoratedResizer, Flex, ChildResizer, BoundsResizer (constraint), layout: ColumnResizer/GridResizer/RowResizer; Margin, IResizer/IParentResizer.
+- utils.Area: прямоугольная область.
+- utils.GuiViewportStack/IViewportStack: стек вьюпортов (для вложенных canvas и модальных).
+- При добавлении компонентов используйте resizer() для привязки к контейнеру (anchor, offset, size), гибкая сетка/столбцы/строки через *Resizer.
+
+Компоненты:
+- buttons: GuiButtonElement (кнопки), GuiToggleElement (переключатели), GuiCirculateElement (перебор режимов), GuiIconElement (иконки), GuiSlotElement (слоты).
+- input: текст/числа/цвет/трекпад, texture picker, keybind.
+- list/search: разнообразные списочные и поисковые виджеты.
+- modals: подтверждения/списки/сообщения/всплывающие/промпт.
+- tooltips: dark/light стили, генерация тултипов (LabelTooltip, InterpolationTooltip).
+- utils: GuiCanvas/Editor для рисования/manipulation, GuiInventoryElement, IconContainer, ITextColoring.
+- keyframes: GuiDopeSheet (таблица кейфреймов по дорожкам), GuiGraphView (кривые интерполяции), GuiKeyframeElement/InterpolationsList, GuiKeyframesEditor, GuiSheet — ядро редакторов анимаций/таймлайнов.
+
+События/хоткеи:
+- Клиент: KeyboardHandler (McLib.client.KeyboardHandler) — базовый хендлер клавиш (в McLib), KeybindConfig хранит раскладки. Вокруг этого строятся keybinds GUI (например, для Blockbuster/Emoticons).
+
+Отрисовка:
+- GuiDraw/Drawable; RenderLightmap, VertexBuilder; цвета/границы/сетки управляются конфигами McLib (enable_borders/checkbox_rendering/grid_rendering/primary_color и т.д.)
+
+I18n:
+- IKey/IKey.lang("mod.key") и LangKey: все тексты GUI через ключи, привязанные к assets/<mod>/lang/*.lang.
+
+4.2) Каталог GUI по модулям
+
+McLib (модули/экраны общего назначения):
+- Весь «framework» и «keyframes» набор — общие компоненты (см. §4.1).
+- mclib.client.mclib.*: GuiAbstractDashboard, GuiDashboard, GuiDashboardPanel(s), GuiDebugPanel, GuiGraphPanel — общий «дашборд» (плагинообразные панели).
+- utils.Elements, GuiUtils, InterpolationRenderer — вспомогательные.
+
+Metamorph (mchorse.metamorph.client.gui.*):
+- GuiMorphs — основной экран выбора/редактирования морфов.
+  - Элементы: списки категорий/секций (creative.categories.*), список морфов, панель превью (GuiMorphRenderer), панель свойств (GuiSettingsPanel), кнопки предпросмотра/применения/сохранения, поиск, фильтры (Recent/Acquired/User).
+  - Лейаут: основной контейнер с разделением на левую (категории/списки), центральную (превью), правую (свойства) панели; ресайзеры: ColumnResizer/RowResizer.
+  - Состояния: творческий/выживание; доступность элементов зависит от permmisions (opEntitySelector) и CommonProxy.canUse().
+  - События: выбор морфа → отправка PacketSelectMorph / PacketMorphPlayer, редактирование → sync пакеты (creative PacketSyncMorph), удаление/избранное → PacketFavorite/Remove.
+- creative.*:
+  - GuiCreativeMorphs/GuiCreativeScreen — полноэкранные экраны c вкладками: меню, список, редактор; списки с поиском (GuiLabelSearchListElement/GuiStringSearchListElement).
+  - GuiMorphSection — секция с панелями редактирования.
+  - GuiQuickEditor/GuiNestedEdit — модальные/вспомогательные редакторы свойств морфа.
+  - GuiSelectorEditor/GuiSelectorsScreen — редактор «селекторов» (клиентские selectors.json)
+- editor.*:
+  - GuiAbstractMorph — базовый редактор морфа.
+  - GuiAnimation — панель анимации (использует McLib keyframe виджеты).
+  - GuiMorphPanel/GuiSettingsPanel — конкретные свойства.
+- overlays.*:
+  - GuiHud (HUD с эмблемами/морф-инфо), GuiOverlay — overlay для acquired морфов.
+- survival.*:
+  - GuiSurvivalMorphs/GuiSurvivalScreen — упрощенная версия GUI для выживания (колёсико/список).
+- Хоткеи: ClientProxy.keys (KeyboardHandler) — переключение морфов/панелей.
+
+Emoticons (mchorse.emoticons.client.gui.*):
+- GuiEmotes — экран выбора и управления эмотами.
+  - Элементы: список эмоций (GuiEmotesList), фильтры/поиск, кнопки Play/Stop/Loop/Assign Keys (через EmoteKeys), предпросмотр модели (GuiEmoticonsModelRenderer).
+  - Состояния: cosmetic режим (ClientProxy.mode = CosmeticMode.CLIENT | возможно серверный), disableAnimations/disableSoundEvents влияние на поведение.
+  - События: выбор/запуск эмота → отправка PacketEmote; отображение/предпросмотр через AnimationManager/AnimatorController; подгрузка actionMap.
+- GuiEmoticonsModelRenderer — виджет просмотра (орбитал камера, слои props/ragdoll, отображение actions).
+- Интеграция GUI с Metamorph/Blockbuster через BBIntegration/MetamorphHandler — могут добавлять вкладки/кнопки в другие GUI.
+
+Chameleon (mchorse.chameleon.metamorph.editor.*):
+- GuiChameleonMorph — основной редактор морфа «хамелеон».
+  - Элементы: GuiChameleonModelRenderer — просмотр bedrock‑модели; GuiChameleonMainPanel — панель свойств; панель действий GuiActionsPanel (использует ActionsConfig/ActionConfig); GuiCustomBodyPartEditor — редактирование костей/частей.
+  - Состояния: перечень действий (idle/running/sprinting/crouching/…/shoot/consume/animation), параметры clamp/reset/speed/fade/tick, приоритеты; привязка к Animator/ActionPlayback.
+  - События: изменение действия → refresh() Animator; предпросмотр с FadeIn/Out; подсветка костей (ChameleonHighlightRenderer/StencilRenderer).
+
+Blockbuster (таймлайн/редакторы):
+- GuiRecordingEditorPanel — центральный редактор записей («sequencer» действий), включает:
+  - GuiRecordTimeline — таймлайн с дорожками и клипами (клики действий)
+  - GuiRecordList — список записей/треков
+  - Панель действий (GuiActionPanel + специализированные панели для каждого типа действия): BlockAction/Break/BreakAnimation/Chat/Command/Damage/Drop/Equip/HotbarChange/InteractEntity/ItemUse/ItemUseBlock/Morph/Mounting/PlaceBlock/ShootArrow — каждая содержит набор input‑элементов (GuiTextElement, GuiTrackpadElement, GuiToggle, списки), тултипы и контекстные операции (добавить/удалить/сдвинуть).
+  - Панели сцены: GuiSceneManager/Panel, GuiReplaySelector — менеджмент сцен, воспроизведение/запрос длительности (через aperture/network)
+  - Панель частиц: snowstorm.* — полнофункциональный редактор систем частиц (секционные панели, графики/градиенты, предпросмотр)
+  - Модельный редактор: GuiModelEditorPanel + вкладки (Limbs/List/Options/Poses), утилиты (GuiBBModelRenderer, GuiPoseTransformations, GuiTextureCanvas), контекстное меню, перетаскивание костей.
+- Навигация/хоткеи: KeyboardHandler; операции таймлайна — начало/конец/воспроизведение/луп/зум; кейфрейм‑кривые для поз используются McLib.GuiGraphView/DopeSheet, если интегрированы.
+
+BetterLights:
+- Прямых GUI нет, кроме CreativeTab (LightTab). Конфигураций/панелей не добавляет.
+
+ExtendedReach:
+- Прямых GUI нет; конфиг через McLib Config GUI (ValueFloat reach) — отображается в стандартном конфиг‑экране на базе McLib (категория general).
+
+Commander:
+- Прямых GUI нет.
+
+4.3) «GUI sequencer morph» — реконструкция
+
+Явного класса с именем «SequencerMorph» среди предоставленных артефактов нет. Функционально наиболее близкие интерфейсы:
+- Blockbuster: GuiRecordingEditorPanel + GuiRecordTimeline — это полноценный секвенсор действий/анимаций с дорожками, клипами, шкалой времени и редакторами экшенов (включая «Morph Action Panel», которая триггерит морфы/состояния — прямое соответствие «sequencer morph»).
+- McLib: keyframes.* — низкоуровневые виджеты для построения секвенсора: GuiDopeSheet (редактор ключей по дорожкам), GuiGraphView (редактор кривых), GuiKeyframesEditor (объединяет эти режимы), что используется как строительный блок таймлайнов/графиков в Blockbuster и потенциально в других модулях.
+- Metamorph: GuiAnimation и смежные редакторы морфов (в creative editor) — используют те же виджеты для таймлайна поз/свойств (секвенсор локален к морфу).
+- Chameleon: не таймлайновый секвенсор, а конфигурация действий/переходов с fade in/out и приоритетами; тем не менее, ActionPlayback поддерживает плавные переходы и тик‑позицию (getTick(partial)), что позволяет визуализировать прогресс.
+
+Глубокая реконструкция UX «sequencer morph» (на базе Blockbuster + McLib keyframes):
+- Основной экран: левая панель — список дорожек (актеры/сущности/морф‑слои), центральная — таймлайн (GuiRecordTimeline/GuiDopeSheet режим), правая — контекстная панель действия (GuiActionPanel).
+- Дорожки (tracks): каждая соответствует объекту (актер, камера, морф), имеет слой клипов (actions). Клип содержит: тип действия, начало/длительность, параметры. Клип визуализируется прямоугольником с заголовком и цветом. Перетаскивание меняет начало/длительность (горячие зоны по краям).
+- Ключи (keys): в режиме деталей клипа — ключевые точки на параметрах (позиция/угол/морф‑параметр). Отображаются в DopeSheet таблице по дорожкам параметров; GraphView — редактирование интерполяций (линейная/кривая), список интерполяций в GuiKeyframeInterpolationsList.
+- Шкала времени: сверху ruler с метками; зум/пан (колесо/drag), goto/playhead (красная линия), кнопки Play/Stop/Loop/Prev/Next key.
+- Инструменты: Insert/Delete clip, Split, Duplicate, Nudge, Snap to grid (grid шаг из McLib config, enable_grid_rendering). Context menu (GuiContextMenu/GuiSimpleContextMenu): операции над клипами/ключами.
+- Горячие клавиши: через KeyboardHandler — пробел (play/pause), +/- (zoom), стрелки (шаг), Del (удалить), Ctrl+C/V (коп/вставить).
+- Данные/сеть: изменение клипов поднимает Packet* (для Blockbuster — специфические пакеты sync записи/длины сцены), для морф‑клипов — PacketMorphAction/PacketMorphState у Metamorph.
+- Тултипы/локализация: LabelTooltip/InterpolationTooltip, строки из assets/*/lang; названия действий (многоязычные).
+
+5) ПАЙПЛАЙН .BOBJ (BOBJ): ОТ ЗАГРУЗКИ ДО ИСПОЛЬЗОВАНИЯ
+
+Области использования:
+- Emoticons — основной потребитель .bobj.
+- Blockbuster — не использует BOBJ; имеет собственные JSON/OBJ/VOX загрузчики.
+- Chameleon/Metamorph — свои форматы (Bedrock‑подобные JSON для Chameleon), морф‑NBT/JSON для Metamorph.
+
+Пайплайн Emoticons:
+1. Источники:
+   - Встроенные ресурсы: /assets/emoticons/models/entity/*.bobj (default/slim/_3d/_simple/_simple_plus), props.bobj, props_simple.bobj, ragdoll.bobj, actions.bobj
+   - Пользовательские файлы: <config>/emoticons/emotes/*.bobj и *.json (метаданные эмотов)
+2. Парсинг:
+   - BOBJLoader.readData(InputStream|FileInputStream) → BOBJData: содержит armatures (скелеты), meshes, actions (BOBJAction), инициализация через ragdoll.initiateArmatures()
+3. Слияние:
+   - ClientProxy.reloadActions():
+     - Загружает actions.bobj, вызывает loadUserEmotes(actions) — добавляет user.actions, читает длительности из .json callback (возврат duration из BOBJAction "emote_<key>")
+     - actionMap = actions.actions ∪ ragdoll.actions
+   - Модели (steve/steve3d/alex/alex3d/… simple/plus):
+     - Присвоение actionMap каждой модели
+     - BOBJLoader.merge(propData, ragdoll); затем merge(modelData, propData или propSimpleData)
+     - Копирование порядка костей ragdoll.armatures["ArmatureRagdoll"] → steve.armatures["Armature"]
+4. Построение анимаций:
+   - new Animation(name, BOBJData) или AnimationSimple
+   - init() для подготовки (кеш, каналы, длительность)
+   - Регистрация в AnimationManager.animations.put(name, new AnimationEntry(animation, configFolder, priority=1))
+   - Загрузка AnimatorConfig (JSON из ресурсов) и регистрация в manager.configs (AnimatorConfigEntry)
+5. GUI/Воспроизведение:
+   - GuiEmotes/GuiEmoticonsModelRenderer — выбор эмоции → управление AnimatorEmoticonsController
+   - Клавиши (EmoteKeys) — триггерят PacketEmote через network.Dispatcher; сервер шлёт широковещание/обработку (ServerHandlerEmote)
+6. Синхронизация/режимы:
+   - CosmeticMode (CLIENT|SERVER‑символика) влияет на направление пакетов
+   - disableAnimations/disableSoundEvents из конфига — выключают проигрывание/звуки
+
+Итог: BOBJ обрабатывается централизованно в Emoticons, объединяя «анимации действий» (actions.bobj) и «скелеты/модели» (default/slim/props/ragdoll), плюс пользовательские расширения. Далее они доступны в менеджере анимаций и GUI.
+
+6) КАРТЫ СООТВЕТСТВИЙ: КЛАССЫ ↔ РЕСУРСЫ ↔ ЛОКАЛИЗАЦИИ ↔ GUI ЭЛЕМЕНТЫ
+
+- Локализации:
+  - McLib: assets/mclib/lang/*.lang — ключи tooltip_style.light/dark, keystrokes_position.*, и др. Используются через IKey.lang().
+  - Emoticons: assets/emoticons/lang/*.lang — ключи player_model.*, player_preview.*, описания эмотов; ValueButtons — client‑side раздел.
+  - Metamorph: assets/metamorph/lang/*.lang — названия морфов, категорий, GUI элементов, подсказки; help команд.
+  - Commander: assets/commander/lang/en_US.lang — commander.forin/help, error.zero и т.д.
+  - ExtendedReach: assets/extendedreach/lang/en_US.lang — названия/описания конфиг‑опций.
+  - Chameleon: assets/chameleon/lang/en_us/ru_ru/uk_ua/zh_cn/zh_tw.lang — описания действий/GUI редактора.
+  - BetterLights: assets/slp/lang/en_US.lang — названия блоков/предметов.
+
+- Ресурсы → коды:
+  - Emoticons: models/entity/*.bobj/*.json → ClientProxy.init → AnimationManager; sounds → проигрываются внутри эмотов (через ссылки в JSON, не показаны в коде дампа)
+  - Blockbuster: models (OBJ/VOX), GUI текстуры/иконки (gui/icons.png), шейдеры (snowstorm)
+  - McLib: assets/mclib/textures/gui/icons.png, shaders/preview.vert/frag
+  - BetterLights: blockstates/models/textures → ModBlocks.registerRenders()
+  - Metamorph: textures/gui/icons.png (общая иконка), shaders/onionskin — не у Metamorph, а у Emoticons (onionskin → нет; в Metamorph — нет шейдеров по дереву)
+
+- GUI элементы ↔ классы:
+  - McLib.GuiButtonElement / Toggle / Circulate ↔ кнопки/переключатели/селекторы режимов в любых панелях (Blockbuster/Metamorph/Emoticons/Chameleon)
+  - McLib.GuiListElement / GuiSearchListElement ↔ списки морфов/эмотов/костылей
+  - McLib.GuiDopeSheet / GuiGraphView ↔ таймлайн редактирования действий (Blockbuster / Metamorph.GuiAnimation)
+  - Emoticons.GuiEmoticonsModelRenderer ↔ предпросмотр анимаций
+  - Blockbuster.GuiBBModelRenderer / GuiTextureCanvas ↔ предпросмотр и редактирование моделей
+
+7) СПРАВОЧНИК КОМАНД, СЕТЕВЫХ КАНАЛОВ И КОНФИГОВ
+
+Команды:
+- Commander:
+  - /forin <start> <end> <command...> — выполняет команду, инкрементируя индекс (i/j/k) от start к end (включительно), с переменными i_c (count), i_s (start), x/y/z координаты отправителя; запрет на одинаковые start/end (commander.error.zero); perm level 2.
+  - /forinc — клиентский аналог (исполнение через ClientCommandHandler), те же аргументы и поведение.
+  - Встроенный препроцессор: 
+    - «||» — разделение на несколько команд одной строки, исполняются по порядку
+    - "@{expr}" — подстановка результата выражения (MathBuilder) в команду (числа форматируются 0.######; также строки)
+- Metamorph:
+  - /morph, /acquiremorph, /metamorph — управление морфами; подробности поведения — через соответствующие классы CommandMorph/CommandAcquireMorph/CommandMetamorph (по дереву).
+- McLib:
+  - CommandMcLib, CommandCheats — служебные/чит‑команды (регистрируются на сервере SP).
+
+Сетевые каналы:
+- Emoticons.channel = "Emoticons" (FMLEventChannel) — PacketEmote/PacketGameMode; client/server handlers.
+- Metamorph.channel = "Metamorph" — creative/survival/settings/blacklist пакеты.
+- McLib.network.mclib.Dispatcher — пакеты PacketAnswer/Boolean/Config/Confirm/DropItem/RequestConfigs/RequestPermission; клиентские/серверные handlers.
+- Blockbuster.aperture — PacketAudioShift, PacketRequestLength/Profiles, PacketSceneLength; client/server handlers.
+- ExtendedReach — каналы не используются (ASM патчи).
+
+Конфиги:
+- McLib (множество): appearance/tutorials/background/scrollbars/multiskin/vanilla, включая цветовые настройки и опции отрисовки, syncable значения (max_packet_size), ValueColors (favorite_colors).
+- Metamorph: acquiring/morphs/preview — набор из ~15 опций, ряд clientSide/syncable; хранение серверных настроек; опции first‑person hand, idle sounds, pause GUI in SP.
+- Emoticons: general/buttons/animations/player_preview — disableAnimations(sync), modelType (режимы), player preview (mode/scale/x/y).
+- ExtendedReach: general.reach = 5.0F по умолчанию (0..1024), syncable.
+- Chameleon: "chameleon.general.buttons" (ValueButtons) — клиентская панель.
+- BetterLights: конфигов нет (кроме mcmod.info).
+
+Пермишены (McLib):
+- permissionFactory; категории "edit_config", "gui", "access_gui"; RegisterPermissionsEvent в McLib.
+
+8) ПРИЛОЖЕНИЕ: ТАБЛИЦЫ КЛАССОВ/МЕТОДОВ И ТОЧКИ ВХОДА (выборочно, по ключевым зонам)
+
+McLib:
+- mchorse.mclib.McLib: onConfigRegister(), onPermissionRegister(), preInit(), init(), serverInit(), main(), test() — точка входа и регистрация инфраструктуры.
+- mchorse.mclib.client.framework: GuiBase, GuiElement, GuiScrollElement, GuiPanelBase, GuiModelRenderer — базовые GUI‑компоненты.
+- mchorse.mclib.client.keyframes: GuiDopeSheet, GuiGraphView, GuiKeyframesEditor — кейфрейм элементы.
+- mchorse.mclib.network.mclib.Dispatcher — регистрация сетевых пакетов.
+- mchorse.mclib.core.* — ClassTransformer'ы (payload/resource manager), влияние на Vanilla.
+
+Metamorph:
+- mchorse.metamorph.Metamorph: preLoad/load/postLoad/serverStarting — канал, конфиги, команды.
+- Proxies: preLoad → Dispatcher.register(), CapabilityManager.INSTANCE.register(); ClientProxy.postLoad() → подмена RenderPlayer на RenderSubPlayer.
+- api.EntityUtils: stripEntityNBT(), compareData(), slotForIndex(), getMorph(), getPose(), getTargetEntity(), rayTrace(), forceUpdateSize(), canPlayerMorphFit() — утилиты морфинга.
+
+Emoticons:
+- mchorse.emoticons.ClientProxy.preInit/init(): загрузка keys.json, регистрация GUI/handlers, загрузка BOBJ, анимаций, конфигов.
+- reloadActions(), loadUserEmotes() — объединение действий, поддержка пользователя.
+- skin_n_bones.api: Animation, AnimationManager (animations/configs), AnimatorConfig/Entry; bobj: BOBJLoader, BOBJAction, BOBJData (initiateArmatures, merge).
+
+Chameleon:
+- ClientProxy.reloadModels()/recursiveReloadModel()/reloadModelFolder(): сканирование и загрузка bedrock‑моделей и анимаций, трекинг lastUpdate, регистрация в ChameleonPack и GlobalTree.
+- animation.ActionPlayback: fade in/out, update(), getTick(), apply() → ChameleonAnimator.animate(...).
+- animation.Animator.refresh()/update()/controlActions(): логика выбора действий по состоянию сущности (здоровье/вода/езда/полет/бег/прыжок/удар/использование bow/eat/drink), idle/running/sprinting/…/shoot/consume.
+
+Blockbuster:
+- GuiRecordingEditorPanel: композиция таймлайна/списка/панелей действий.
+- GuiRecordTimeline: визуализация дорожек/клипов; работа с McLib‑виджетами (допущение, исходя из архитектуры).
+- Множество специализированных панелей действий (см. дерево) — формы с input‑элементами; связывание с Packet*.
+
+ExtendedReach (ASM):
+- PlayerControllerMPTransformer.processGetBlockReachDistance(): заменяет тело метода на BlockReach.getReach(); extendedReach() → BlockReach.isExtended()
+- EntityRendererTransformer.processGetMouseOver(): удаляет 6.0D константу, снижая жесткий порог
+- NetHandlerPlayServerTransformer.processGetMouseOver(): заменяет 9.0D/36.0D → getDoubleReachSq()
+- ItemTransformer.processBlockReach(): заменяет вызовы к EntityPlayer.REACH_DISTANCE → BlockReach.getDoubleReach()
+
+BetterLights:
+- Блоки: методы визуализации/коллизии/светимости; TileEntityLight; регистрация моделей в клиентском прокси.
+
+9) ИСТОЧНИКИ И ПОКРЫТИЕ
+
+Анализ выполнен по предоставленным файлам/деревьям:
+- BetterLights:
+  - ploot887/Mod/files/BetterLights-master_all_files_and_properties.txt
+  - ploot887/Mod/files/BetterLights-master_tree.txt
+- Blockbuster:
+  - ploot887/Mod/files/blockbuster-2.7.1_all_files_and_properties.txt
+  - ploot887/Mod/files/blockbuster-2.7.1_tree.txt
+- Chameleon:
+  - ploot887/Mod/files/chameleon-1.2.2_all_files_and_properties.txt
+  - ploot887/Mod/files/chameleon-1.2.2_tree.txt
+- Commander:
+  - ploot887/Mod/files/commander-1.1_all_files_and_properties.txt
+  - ploot887/Mod/files/commander_1.1_tree.txt
+- Emoticons:
+  - ploot887/Mod/files/emoticons-1.1.2_all_files_and_properties.txt
+  - ploot887/Mod/files/emoticons-1.1.2_tree.txt
+- ExtendedReach:
+  - ploot887/Mod/files/extendedreach-1.1.1_all_files_and_properties.txt
+  - ploot887/Mod/files/extendedreach-1.1.1_tree.txt
+- McLib:
+  - ploot887/Mod/files/mclib-2.4.3_all_files_and_properties.txt
+  - ploot887/Mod/files/mclib-2.4.3_tree.txt
+- Metamorph:
+  - ploot887/Mod/files/metamorph-1.4_all_files_and_properties.txt
+  - ploot887/Mod/files/metamorph-1.4_tree.txt
+
+Ограничения: некоторые большие деревья (например, Blockbuster) сокращены в источнике («[...]»), поэтому полные списки классов в документе приведены по доступной части. Архитектурные выводы сделаны из названий классов, известных паттернов McLib‑GUI и эксплицитных кодовых фрагментов.
+
+ИТОГ
+
+Данный документ консолидирует архитектуру и поведение всего стека модов как единой системы: McLib предоставляет фундамент (GUI/конфига/сеть/утилиты), Metamorph — основу морфинга и GUI, Emoticons — загрузку и проигрывание .bobj анимаций с пользовательскими расширениями, Chameleon — процедурные действия и MoLang, Blockbuster — редакторы/таймлайн («sequencer») и контент, Commander — продвинутые команды, ExtendedReach — геймплейный ASM‑патч reach, BetterLights — контент. Особый акцент дан на BOBJ пайплайн (Emoticons) и на «sequencer morph» (Blockbuster + McLib keyframes), включая детальную реконструкцию UI и взаимодействий. Документ пригоден для дальнейшей разработки, реверс‑инжиниринга и тестирования.
